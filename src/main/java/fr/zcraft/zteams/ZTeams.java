@@ -83,6 +83,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
         instance = this;
     }
 
+
     /**
      * @return This component's instance.
      */
