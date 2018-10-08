@@ -36,15 +36,20 @@ package fr.zcraft.zteams;
 import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zteams.colors.TeamColor;
+import fr.zcraft.zteams.events.TeamChangedEvent;
+import fr.zcraft.zteams.events.TeamRegisteredEvent;
+import fr.zcraft.zteams.events.TeamUnregisteredEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -55,7 +60,7 @@ import java.util.UUID;
  *
  * {@code T} is your own {@link ZTeam} subclass.
  */
-public class ZTeams<T extends ZTeam> extends ZLibComponent
+public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
 {
     private static ZTeams instance;
 
@@ -70,7 +75,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent
 
     private int maxPlayersPerTeam = 0;
 
-    private Map<UUID, T> teams = new HashMap<>();
+    private Set<T> teams = new HashSet<>();
 
     @Override
     protected void onEnable()
@@ -97,7 +102,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent
      */
     public T getTeamByName(final String name)
     {
-        return teams.values().stream().filter(team -> team.getName().trim().equalsIgnoreCase(name)).findFirst().orElse(null);
+        return teams.stream().filter(team -> team.getName().trim().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 
 
@@ -120,7 +125,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent
      */
     public T getTeamForPlayer(final UUID playerID)
     {
-        return teams.values().stream().filter(team -> team.containsPlayer(playerID)).findFirst().orElse(null);
+        return teams.stream().filter(team -> team.containsPlayer(playerID)).findFirst().orElse(null);
     }
 
 
@@ -132,7 +137,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent
      */
     public boolean removePlayerFromTeam(final OfflinePlayer player)
     {
-        return removePlayerFromTeam(player.getUniqueId());
+        return removePlayerFromTeam(player, false);
     }
 
     /**
@@ -143,15 +148,77 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent
      */
     public boolean removePlayerFromTeam(final UUID playerID)
     {
+        return removePlayerFromTeam(playerID, false);
+    }
+
+    /**
+     * Removes a player form its team, if he had any.
+     *
+     * @param player The player.
+     * @param becauseJoin {@code true} if the player is removed to go into another team.
+     * @return {@code true} if the player was actually removed from a team.
+     */
+    boolean removePlayerFromTeam(final OfflinePlayer player, boolean becauseJoin)
+    {
+        return removePlayerFromTeam(player.getUniqueId(), becauseJoin);
+    }
+
+    /**
+     * Removes a player form its team, if he had any.
+     *
+     * @param playerID The player's UUID.
+     * @param becauseJoin {@code true} if the player is removed to go into another team.
+     * @return {@code true} if the player was actually removed from a team.
+     */
+    boolean removePlayerFromTeam(final UUID playerID, boolean becauseJoin)
+    {
         T team = getTeamForPlayer(playerID);
 
         if (team != null)
         {
-            team.removePlayer(playerID);
+            team.removePlayer(playerID, becauseJoin);
             return true;
         }
 
         else return false;
+    }
+
+
+
+    /* *** Teams registration *** */
+
+
+    /**
+     * Registers a new team.
+     *
+     * @param team The team.
+     */
+    public void registerTeam(T team)
+    {
+        teams.add(team);
+        fireEvent(new TeamRegisteredEvent(team));
+    }
+
+    /**
+     * Unregisters a team.
+     *
+     * @param team The team.
+     * @return {@code true} if the team was actually unregistered.
+     */
+    public boolean unregisterTeam(T team)
+    {
+        final boolean actuallyUnregistered = teams.remove(team);
+        fireEvent(new TeamUnregisteredEvent(team));
+
+        return actuallyUnregistered;
+    }
+
+    /**
+     * Unregisters all the teams.
+     */
+    public void unregisterAll()
+    {
+        new HashSet<>(teams).forEach(ZTeam::deleteTeam);
     }
 
 
@@ -204,7 +271,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent
         final Set<TeamColor> availableColors = new HashSet<>(Arrays.asList(TeamColor.values()));
         availableColors.remove(TeamColor.RANDOM);
 
-        teams.values().stream().map(T::getColorOrWhite).forEach(availableColors::remove);
+        teams.stream().map(T::getColorOrWhite).forEach(availableColors::remove);
 
         if (availableColors.size() != 0)
         {
@@ -215,6 +282,16 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent
             // length - 1 so the RANDOM option is never selected.
             return TeamColor.values()[(new Random()).nextInt(TeamColor.values().length - 1)];
         }
+    }
+
+
+
+    /* *** Events *** */
+
+    @EventHandler
+    public void onTeamChanged(final TeamChangedEvent ev)
+    {
+        // TODO updateGUIs();
     }
 
 
@@ -338,11 +415,26 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent
 
     private void updateTeamsOptions()
     {
-        teams.values().forEach(ZTeam::updateTeamOptions);
+        teams.forEach(ZTeam::updateTeamOptions);
     }
 
     private void updateDefaultBanners()
     {
-        teams.values().forEach(ZTeam::updateDefaultBanner);
+        teams.forEach(ZTeam::updateDefaultBanner);
+    }
+
+
+
+    /* *** Utilities *** */
+
+
+    /**
+     * Fires an event.
+     *
+     * @param event The event.
+     */
+    static void fireEvent(Event event)
+    {
+        Bukkit.getPluginManager().callEvent(event);
     }
 }

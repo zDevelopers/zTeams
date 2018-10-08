@@ -37,6 +37,11 @@ import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import fr.zcraft.zlib.tools.items.TextualBanners;
 import fr.zcraft.zteams.colors.ColorsUtils;
 import fr.zcraft.zteams.colors.TeamColor;
+import fr.zcraft.zteams.events.PlayerJoinedTeamEvent;
+import fr.zcraft.zteams.events.PlayerLeftTeamEvent;
+import fr.zcraft.zteams.events.PlayerPreJoinTeamEvent;
+import fr.zcraft.zteams.events.PlayerPreLeaveTeamEvent;
+import fr.zcraft.zteams.events.TeamUpdatedEvent;
 import fr.zcraft.zteams.texts.TextUtils;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
@@ -270,9 +275,7 @@ public abstract class ZTeam
         updateDisplayName();
         updateDefaultBanner();
 
-        ZTeams.get().updateGUIs();  // TODO
-
-        // TODO Send event
+        ZTeams.fireEvent(new TeamUpdatedEvent(this));
     }
 
     /**
@@ -301,7 +304,7 @@ public abstract class ZTeam
         // The default banner too
         updateDefaultBanner();
 
-        ZTeams.get().updateGUIs();
+        ZTeams.fireEvent(new TeamUpdatedEvent(this));
     }
 
     /**
@@ -333,7 +336,7 @@ public abstract class ZTeam
             this.banner.setItemMeta(meta);
         }
 
-        ZTeams.get().updateGUIs();
+        ZTeams.fireEvent(new TeamUpdatedEvent(this));
     }
 
     /**
@@ -357,7 +360,7 @@ public abstract class ZTeam
 
         this.banner.setItemMeta(banner.clone());
 
-        ZTeams.get().updateGUIs();
+        ZTeams.fireEvent(new TeamUpdatedEvent(this));
     }
 
 
@@ -377,19 +380,23 @@ public abstract class ZTeam
 
         if (ZTeams.get().maxPlayersPerTeam() != 0 && this.players.size() >= ZTeams.get().maxPlayersPerTeam())
         {
-            throw new RuntimeException("The team " + getName() + " is full");
+            throw new RuntimeException("The team " + name + " is full");
         }
 
+        final PlayerPreJoinTeamEvent event = new PlayerPreJoinTeamEvent(this, player);
+        ZTeams.fireEvent(event);
+
+        if (event.isCancelled()) return;
+
         // Removes the player for an eventual other team
-        ZTeams.get().removePlayerFromTeam(player);
+        ZTeams.get().removePlayerFromTeam(player, true);
 
         players.add(player.getUniqueId());
         internalTeam.addPlayer(player);
 
         ZTeams.get().colorizePlayer(player);
-        ZTeams.get().updateGUIs();
 
-        // TODO Send event
+        ZTeams.fireEvent(new PlayerJoinedTeamEvent(this, player));
     }
 
     /**
@@ -401,15 +408,7 @@ public abstract class ZTeam
      */
     public void removePlayer(final OfflinePlayer player)
     {
-        Validate.notNull(internalTeam, "This team was deleted");
-        Validate.notNull(player, "The player cannot be null.");
-
-        players.remove(player.getUniqueId());
-        unregisterPlayer(player);
-
-        ZTeams.get().updateGUIs();
-
-        // TODO Send event
+        removePlayer(player, false);
     }
 
     /**
@@ -421,12 +420,52 @@ public abstract class ZTeam
      */
     public void removePlayer(UUID playerID)
     {
+        removePlayer(playerID, false);
+    }
+
+    /**
+     * Removes a player from this team.
+     *
+     * Nothing is done if the player wasn't in this team.
+     *
+     * @param player The player to remove.
+     * @param becauseJoin {@code true} if the player is removed to go into another team.
+     */
+    void removePlayer(final OfflinePlayer player, boolean becauseJoin)
+    {
+        Validate.notNull(internalTeam, "This team was deleted");
+        Validate.notNull(player, "The player cannot be null.");
+
+        if (!becauseJoin)
+        {
+            final PlayerPreLeaveTeamEvent event = new PlayerPreLeaveTeamEvent(this, player);
+            ZTeams.fireEvent(event);
+
+            if (event.isCancelled()) return;
+        }
+
+        players.remove(player.getUniqueId());
+        unregisterPlayer(player);
+
+        ZTeams.fireEvent(new PlayerLeftTeamEvent(this, player, becauseJoin));
+    }
+
+    /**
+     * Removes a player from this team.
+     *
+     * Nothing is done if the player wasn't in this team.
+     *
+     * @param playerID The player to remove.
+     * @param becauseJoin {@code true} if the player is removed to go into another team.
+     */
+    void removePlayer(UUID playerID, boolean becauseJoin)
+    {
         Validate.notNull(playerID, "The player's UUID cannot be null");
 
         final OfflinePlayer player = Bukkit.getOfflinePlayer(playerID);
         Validate.notNull(player, "The player with the UUID " + playerID + " cannot be found");
 
-        removePlayer(player);
+        removePlayer(player, becauseJoin);
     }
 
     /**
@@ -485,6 +524,8 @@ public abstract class ZTeam
         // Then the scoreboard team is deleted.
         internalTeam.unregister();
         internalTeam = null;
+
+        ZTeams.get().unregisterTeam(this);
     }
 
     /**
