@@ -31,13 +31,6 @@
  */
 package fr.zcraft.zteams.guis;
 
-import eu.carrade.amaury.UHCReloaded.UHCReloaded;
-import eu.carrade.amaury.UHCReloaded.UHConfig;
-import eu.carrade.amaury.UHCReloaded.gui.teams.builder.TeamBuilderStepColorGUI;
-import eu.carrade.amaury.UHCReloaded.gui.teams.editor.TeamEditGUI;
-import eu.carrade.amaury.UHCReloaded.teams.TeamManager;
-import eu.carrade.amaury.UHCReloaded.teams.UHTeam;
-import eu.carrade.amaury.UHCReloaded.utils.ColorsUtils;
 import fr.zcraft.zlib.components.gui.ExplorerGui;
 import fr.zcraft.zlib.components.gui.Gui;
 import fr.zcraft.zlib.components.gui.GuiAction;
@@ -45,39 +38,33 @@ import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.gui.PromptGui;
 import fr.zcraft.zlib.components.i18n.I;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
+import fr.zcraft.zteams.ZTeam;
+import fr.zcraft.zteams.ZTeams;
+import fr.zcraft.zteams.ZTeamsPermission;
+import fr.zcraft.zteams.colors.ColorsUtils;
+import fr.zcraft.zteams.guis.builder.TeamBuilderStepColorGUI;
+import fr.zcraft.zteams.guis.editor.TeamEditGUI;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class TeamsSelectorGUI extends ExplorerGui<UHTeam>
+public class TeamsSelectorGUI extends ExplorerGui<ZTeam>
 {
-    private final String TEAM_ITEM_TYPE;
-    private final boolean GLOW_ON_CURRENT_TEAM;
-
-    private final TeamManager tm = UHCReloaded.get().getTeamManager();
-
-    public TeamsSelectorGUI()
-    {
-        TEAM_ITEM_TYPE       = UHConfig.TEAMS_OPTIONS.CHEST_GUI.DISPLAY.TEAM_ITEM.get().toLowerCase();
-        GLOW_ON_CURRENT_TEAM = UHConfig.TEAMS_OPTIONS.CHEST_GUI.DISPLAY.GLOW_ON_SELECTED_TEAM.get();
-    }
-
     @Override
     protected void onUpdate()
     {
         /// The title of the teams selector GUI. {0} = teams count.
-        setTitle(I.t("{black}Select a team {reset}({0})", tm.getTeams().size()));
-        setData(tm.getTeams().toArray(new UHTeam[tm.getTeams().size()]));
+        setTitle(I.t("{black}Select a team {reset}({0})", ZTeams.get().countTeams()));
+        setData(ZTeams.get().getTeamsArray());
 
         setMode(Mode.READONLY);
         setKeepHorizontalScrollingSpace(true);
 
-        if (getPlayer().hasPermission("uh.player.renameTeam"))
+        if (ZTeamsPermission.UPDATE_TEAM_NAME.grantedTo(getPlayer()))
         {
             int renameSlot = getPlayer().hasPermission("uh.team") ? getSize() - 6 : getSize() - 5;
 
@@ -85,11 +72,11 @@ public class TeamsSelectorGUI extends ExplorerGui<UHTeam>
                     /// The title of a button to rename our team, in the selector GUI.
                     Material.BOOK_AND_QUILL, I.t("{white}Rename your team"),
                     /// Warning displayed in the "Rename your team" button, if the player is not in a team
-                    tm.getTeamForPlayer(getPlayer()) == null ? GuiUtils.generateLore(I.t("{gray}You have to be in a team")) : null
+                    ZTeams.get().getTeamForPlayer(getPlayer()) == null ? GuiUtils.generateLore(I.t("{gray}You have to be in a team")) : null
             ));
         }
 
-        if (getPlayer().hasPermission("uh.team"))
+        if (ZTeamsPermission.CREATE_TEAM.grantedTo(getPlayer()))
         {
             int newTeamSlot = getPlayer().hasPermission("uh.player.renameTeam") ? getSize() - 4 : getSize() - 5;
 
@@ -99,9 +86,9 @@ public class TeamsSelectorGUI extends ExplorerGui<UHTeam>
     }
 
     @Override
-    protected ItemStack getViewItem(UHTeam team)
+    protected ItemStack getViewItem(ZTeam team)
     {
-        final boolean playerInTeam = team.getPlayersUUID().contains(getPlayer().getUniqueId());
+        final boolean isPlayerInTeam = team.getPlayersUUID().contains(getPlayer().getUniqueId());
 
 
         // Lore
@@ -113,16 +100,14 @@ public class TeamsSelectorGUI extends ExplorerGui<UHTeam>
         {
             /// The "Players" title in the selector GUI, on a team's tooltip
             lore.add(I.t("{blue}Players"));
-            for (OfflinePlayer player : team.getPlayers())
-            {
-                /// An item of the players list in the selector GUI, on a team's tooltip
-                lore.add(I.t("{darkgray}- {white}{0}", player.getName()));
-            }
+
+            /// An item of the players list in the selector GUI, on a team's tooltip
+            team.getPlayers().stream().map(player -> I.t("{darkgray}- {white}{0}", player.getName())).forEach(lore::add);
 
             lore.add("");
         }
 
-        if (getPlayer().hasPermission("uh.player.join.self") && !playerInTeam)
+        if (ZTeamsPermission.JOIN_TEAM.grantedTo(getPlayer()) && !isPlayerInTeam)
         {
             if (!team.isFull())
             {
@@ -133,12 +118,12 @@ public class TeamsSelectorGUI extends ExplorerGui<UHTeam>
                 lore.add(I.t("{darkgray}» {red}This team is full"));
             }
         }
-        else if (getPlayer().hasPermission("uh.player.leave.self") && playerInTeam)
+        else if (ZTeamsPermission.LEAVE_TEAM.grantedTo(getPlayer()) && isPlayerInTeam)
         {
             lore.add(I.t("{darkgray}» {white}Click {gray}to leave this team"));
         }
 
-        if (getPlayer().hasPermission("uh.team"))  // TODO adapt with new granular permissions
+        if (hasManagementPermission())
         {
             lore.add(I.t("{darkgray}» {white}Right-click {gray}to manage this team"));
         }
@@ -148,44 +133,45 @@ public class TeamsSelectorGUI extends ExplorerGui<UHTeam>
         final ItemStack item;
         final DyeColor dye = ColorsUtils.chat2Dye(team.getColorOrWhite().toChatColor());
 
-        switch (TEAM_ITEM_TYPE)
+        switch (ZTeams.settings().teamsGUIItemType())
         {
-            case "banner":
+            case BANNER:
                 item = team.getBanner();
                 break;
 
-            case "clay":
+            case CLAY:
                 item = new ItemStack(Material.STAINED_CLAY, 1, dye.getWoolData());
                 break;
 
-            case "glass":
+            case GLASS:
                 item = new ItemStack(Material.STAINED_GLASS_PANE, 1, dye.getWoolData());
                 break;
 
-            case "glass_pane":
+            case GLASS_PANE:
                 item = new ItemStack(Material.STAINED_GLASS_PANE, 1, dye.getWoolData());
                 break;
 
-            case "dye":
+            case DYE:
                 item = new ItemStack(Material.INK_SACK, 1, dye.getDyeData());
                 break;
 
+            case WOOL:
             default:
                 item = new ItemStack(Material.WOOL, 1, dye.getWoolData());
         }
 
 
         // Title
-        final String title = tm.getMaxPlayersPerTeam() != 0
+        final String title = ZTeams.settings().maxPlayersPerTeam() != 0
                 /// Title of the team item in the teams selector GUI (with max). {0}: team display name. {1}: players count. {2}: max count.
-                ? I.t("{white}Team {0} {gray}({1}/{2})", team.getDisplayName(), team.getSize(), tm.getMaxPlayersPerTeam())
+                ? I.t("{white}Team {0} {gray}({1}/{2})", team.getDisplayName(), team.getSize(), ZTeams.settings().maxPlayersPerTeam())
                 /// Title of the team item in the teams selector GUI (without max) {0}: team display name. {1}: players count.
                 : I.tn("{white}Team {0} {gray}({1} player)", "{white}Team {0} {gray}({1} players)", team.getSize(), team.getDisplayName(), team.getSize());
 
         return new ItemStackBuilder(item)
                 .title(title)
                 .lore(lore)
-                .glow(GLOW_ON_CURRENT_TEAM && playerInTeam)
+                .glow(ZTeams.settings().teamsGUIGlowOnCurrentTeam() && isPlayerInTeam)
                 .hideAttributes()
                 .item();
     }
@@ -205,11 +191,11 @@ public class TeamsSelectorGUI extends ExplorerGui<UHTeam>
     }
 
     @Override
-    protected ItemStack getPickedUpItem(UHTeam team)
+    protected ItemStack getPickedUpItem(ZTeam team)
     {
         final boolean playerInTeam = team.getPlayersUUID().contains(getPlayer().getUniqueId());
 
-        if (getPlayer().hasPermission("uh.player.join.self") && !playerInTeam)
+        if (ZTeamsPermission.JOIN_TEAM.grantedTo(getPlayer()) && !playerInTeam)
         {
             try
             {
@@ -217,7 +203,7 @@ public class TeamsSelectorGUI extends ExplorerGui<UHTeam>
             }
             catch (RuntimeException ignored) {} // team full, does nothing
         }
-        else if (getPlayer().hasPermission("uh.player.leave.self") && playerInTeam)
+        else if (ZTeamsPermission.LEAVE_TEAM.grantedTo(getPlayer()) && playerInTeam)
         {
             team.removePlayer(getPlayer());
         }
@@ -227,9 +213,9 @@ public class TeamsSelectorGUI extends ExplorerGui<UHTeam>
     }
 
     @Override
-    protected void onRightClick(UHTeam team)
+    protected void onRightClick(ZTeam team)
     {
-        if (getPlayer().hasPermission("uh.team"))  // TODO adapt with new granular permissions
+        if (hasManagementPermission())
         {
             Gui.open(getPlayer(), new TeamEditGUI(team), this);
         }
@@ -242,7 +228,7 @@ public class TeamsSelectorGUI extends ExplorerGui<UHTeam>
     @GuiAction ("rename")
     public void rename()
     {
-        final UHTeam team = tm.getTeamForPlayer(getPlayer());
+        final ZTeam team = ZTeams.get().getTeamForPlayer(getPlayer());
         if (team == null) return;
 
         Gui.open(getPlayer(), new PromptGui(team::setName, team.getName()), this);
@@ -252,5 +238,12 @@ public class TeamsSelectorGUI extends ExplorerGui<UHTeam>
     public void newTeam()
     {
         Gui.open(getPlayer(), new TeamBuilderStepColorGUI());
+    }
+
+    private boolean hasManagementPermission()
+    {
+        return ZTeamsPermission.UPDATE_TEAM_NAME.grantedTo(getPlayer())
+                || ZTeamsPermission.UPDATE_TEAM_COLOR.grantedTo(getPlayer())
+                || ZTeamsPermission.UPDATE_TEAM_BANNER.grantedTo(getPlayer());
     }
 }

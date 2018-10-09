@@ -31,11 +31,12 @@
  */
 package fr.zcraft.zteams.guis.builder;
 
-import eu.carrade.amaury.UHCReloaded.teams.TeamColor;
-import eu.carrade.amaury.UHCReloaded.utils.TextUtils;
 import fr.zcraft.zlib.components.gui.ActionGui;
 import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.i18n.I;
+import fr.zcraft.zlib.tools.items.ItemStackBuilder;
+import fr.zcraft.zteams.colors.TeamColor;
+import fr.zcraft.zteams.texts.TextUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -55,7 +56,10 @@ public abstract class TeamBuilderBaseGUI extends ActionGui
         {
             if (i != 1 && i != 4 && i != 7)
             {
-                action("", i, GuiUtils.makeItem(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.WHITE.getWoolData()), ChatColor.RESET + " ", null));
+                action("", i, new ItemStackBuilder(Material.STAINED_GLASS_PANE)
+                        .data(DyeColor.WHITE.getWoolData())
+                        .title(ChatColor.RESET, " ")
+                );
             }
             else
             {
@@ -85,6 +89,11 @@ public abstract class TeamBuilderBaseGUI extends ActionGui
                         slotStep.getName(),
                         achieved ? Collections.singletonList(achievedSubtitle) : null
                 ));
+                action("", i, new ItemStackBuilder(Material.STAINED_GLASS_PANE)
+                        .data(achieved ? DyeColor.LIME.getWoolData() : DyeColor.RED.getWoolData())
+                        .title(slotStep.getName())
+                        .lore(achieved ? new String[] { achievedSubtitle } : new String[] {})
+                );
             }
         }
     }

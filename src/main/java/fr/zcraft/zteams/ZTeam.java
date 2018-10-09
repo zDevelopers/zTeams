@@ -37,6 +37,7 @@ import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import fr.zcraft.zlib.tools.items.TextualBanners;
 import fr.zcraft.zteams.colors.ColorsUtils;
 import fr.zcraft.zteams.colors.TeamColor;
+import fr.zcraft.zteams.creator.ZTeamCreator;
 import fr.zcraft.zteams.events.PlayerJoinedTeamEvent;
 import fr.zcraft.zteams.events.PlayerLeftTeamEvent;
 import fr.zcraft.zteams.events.PlayerPreJoinTeamEvent;
@@ -64,13 +65,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+
 /**
  * Represents a team.
  *
- * This class must be subclassed in your project, to add your specific teams attributes.
- * (And if you don't need new attributes, subclass without adding anything.)
+ * If you need to add your own teams attribute, subclass this class,
+ * instantiate a custom parametrized {@link ZTeams<YourTeamClass>} instance,
+ * and provide a custom {@link ZTeamCreator} to create new teams instances.
  */
-public abstract class ZTeam
+public class ZTeam
 {
     private static final Random random = new Random();
 
@@ -93,7 +96,7 @@ public abstract class ZTeam
         // We use a random internal name because the name of a team, in Minecraft vanilla, is limited
         // (16 characters max).
         this.internalName = String.valueOf(random.nextInt(99999999)) + String.valueOf(random.nextInt(99999999));
-        this.internalTeam = ZTeams.get().getScoreboard().registerNewTeam(this.internalName);
+        this.internalTeam = ZTeams.settings().scoreboard().registerNewTeam(this.internalName);
 
         setName(name);
         setColor(color);
@@ -250,7 +253,7 @@ public abstract class ZTeam
      */
     public boolean isFull()
     {
-        return ZTeams.get().maxPlayersPerTeam() != 0 && getSize() >= ZTeams.get().maxPlayersPerTeam();
+        return ZTeams.settings().maxPlayersPerTeam() != 0 && getSize() >= ZTeams.settings().maxPlayersPerTeam();
     }
 
 
@@ -378,7 +381,7 @@ public abstract class ZTeam
         Validate.notNull(internalTeam, "This team was deleted");
         Validate.notNull(player, "The player cannot be null.");
 
-        if (ZTeams.get().maxPlayersPerTeam() != 0 && this.players.size() >= ZTeams.get().maxPlayersPerTeam())
+        if (ZTeams.settings().maxPlayersPerTeam() != 0 && this.players.size() >= ZTeams.settings().maxPlayersPerTeam())
         {
             throw new RuntimeException("The team " + name + " is full");
         }
@@ -564,8 +567,8 @@ public abstract class ZTeam
     void updateTeamOptions()
     {
         internalTeam.setSuffix(ChatColor.RESET.toString());
-        internalTeam.setCanSeeFriendlyInvisibles(ZTeams.get().teamsOptionsSeeFriendlyInvisibles());
-        internalTeam.setAllowFriendlyFire(ZTeams.get().teamsOptionsFriendlyFire());
+        internalTeam.setCanSeeFriendlyInvisibles(ZTeams.settings().teamsOptionsSeeFriendlyInvisibles());
+        internalTeam.setAllowFriendlyFire(ZTeams.settings().teamsOptionsFriendlyFire());
     }
 
     /**
@@ -582,12 +585,12 @@ public abstract class ZTeam
 
         final DyeColor dye = ColorsUtils.chat2Dye(getColorOrWhite().toChatColor());
 
-        if (ZTeams.get().bannerShapeWriteLetter())
+        if (ZTeams.settings().bannerShapeWriteLetter())
         {
             defaultBanner = TextualBanners.getCharBanner(
                 Character.toUpperCase(TextUtils.getInitialLetter(name)),
                 dye,
-                ZTeams.get().bannerShapeAddBorder()
+                ZTeams.settings().bannerShapeAddBorder()
             );
         }
         else

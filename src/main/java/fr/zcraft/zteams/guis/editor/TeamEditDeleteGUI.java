@@ -31,21 +31,20 @@
  */
 package fr.zcraft.zteams.guis.editor;
 
-import eu.carrade.amaury.UHCReloaded.UHCReloaded;
-import eu.carrade.amaury.UHCReloaded.gui.teams.TeamsSelectorGUI;
-import eu.carrade.amaury.UHCReloaded.teams.UHTeam;
 import fr.zcraft.zlib.components.gui.Gui;
 import fr.zcraft.zlib.components.gui.GuiAction;
-import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.i18n.I;
+import fr.zcraft.zlib.tools.items.ItemStackBuilder;
+import fr.zcraft.zteams.ZTeam;
+import fr.zcraft.zteams.ZTeams;
+import fr.zcraft.zteams.guis.TeamsSelectorGUI;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
 
 
 public class TeamEditDeleteGUI extends TeamActionGUI
 {
-    public TeamEditDeleteGUI(UHTeam team)
+    public TeamEditDeleteGUI(ZTeam team)
     {
         super(team);
     }
@@ -66,24 +65,22 @@ public class TeamEditDeleteGUI extends TeamActionGUI
 
         for (int slot = 0; slot < 3; slot++)
         {
-            action("keep", slot, GuiUtils.makeItem(
-                    new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.LIME.getWoolData()),
-                    /// The title of the "keep" button in the delete team GUI
-                    I.t("{green}Keep this team alive"),
-                    null
-            ));
+            action("keep", slot, new ItemStackBuilder(Material.STAINED_GLASS_PANE)
+                .data(DyeColor.LIME.getWoolData())
+                /// The title of the "keep" button in the delete team GUI
+                .title(I.t("{green}Keep this team alive"))
+            );
         }
 
         action("", 4, team.getBanner());
 
         for (int slot = 6; slot < 9; slot++)
         {
-            action("delete", slot, GuiUtils.makeItem(
-                    new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getWoolData()),
+            action("delete", slot, new ItemStackBuilder(Material.STAINED_GLASS_PANE)
+                    .data(DyeColor.RED.getWoolData())
                     /// The title of the "delete" button in the delete team GUI
-                    I.t("{red}Delete this team {italic}forever"),
-                    null
-            ));
+                    .title(I.t("{red}Delete this team {italic}forever"))
+            );
         }
     }
 
@@ -97,7 +94,7 @@ public class TeamEditDeleteGUI extends TeamActionGUI
     @GuiAction ("delete")
     protected void delete()
     {
-        UHCReloaded.get().getTeamManager().removeTeam(team);
+        ZTeams.get().unregisterTeam(team);
         Gui.open(getPlayer(), new TeamsSelectorGUI());
     }
 }

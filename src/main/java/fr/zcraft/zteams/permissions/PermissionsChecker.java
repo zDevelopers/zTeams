@@ -29,37 +29,24 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zteams.guis.editor;
+package fr.zcraft.zteams.permissions;
 
-import fr.zcraft.zlib.components.gui.Gui;
-import fr.zcraft.zlib.components.i18n.I;
-import fr.zcraft.zteams.ZTeam;
-import fr.zcraft.zteams.colors.TeamColor;
-import fr.zcraft.zteams.guis.builder.TeamBuilderStepColorGUI;
+import fr.zcraft.zteams.ZTeamsPermission;
+import org.bukkit.permissions.Permissible;
 
 
-public class TeamEditColorGUI extends TeamBuilderStepColorGUI
+/**
+ * Permissions checker for zTeams actions in GUIs or commands.
+ */
+public interface PermissionsChecker
 {
-    private final ZTeam team;
-
-    public TeamEditColorGUI(ZTeam team)
-    {
-        this.team = team;
-    }
-
-    @Override
-    protected void onUpdate()
-    {
-        /// The title of the edit team color GUI. {0} = team name (raw).
-        setTitle(I.t("{0} » {black}Color", team.getName()));
-        setSize(6 * 9);
-        insertColors(2);
-    }
-
-    @Override
-    protected void saveColor(TeamColor color)
-    {
-        team.setColor(color);
-        Gui.open(getPlayer(), new TeamEditGUI(team), getParent().getParent());
-    }
+    /**
+     * Checks if the given permissible is allowed to do the given action.
+     *
+     * @param permissible The permissible.
+     * @param permission The checked permission.
+     *
+     * @return {@code true} if allowed.
+     */
+    boolean hasPermission(Permissible permissible, ZTeamsPermission permission);
 }

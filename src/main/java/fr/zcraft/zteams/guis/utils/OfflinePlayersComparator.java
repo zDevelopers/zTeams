@@ -29,37 +29,29 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zteams.guis.editor;
+package fr.zcraft.zteams.guis.utils;
 
-import fr.zcraft.zlib.components.gui.Gui;
-import fr.zcraft.zlib.components.i18n.I;
-import fr.zcraft.zteams.ZTeam;
-import fr.zcraft.zteams.colors.TeamColor;
-import fr.zcraft.zteams.guis.builder.TeamBuilderStepColorGUI;
+import org.bukkit.OfflinePlayer;
+
+import java.util.Comparator;
 
 
-public class TeamEditColorGUI extends TeamBuilderStepColorGUI
+public class OfflinePlayersComparator implements Comparator<OfflinePlayer>
 {
-    private final ZTeam team;
-
-    public TeamEditColorGUI(ZTeam team)
-    {
-        this.team = team;
-    }
-
     @Override
-    protected void onUpdate()
+    public int compare(OfflinePlayer player1, OfflinePlayer player2)
     {
-        /// The title of the edit team color GUI. {0} = team name (raw).
-        setTitle(I.t("{0} » {black}Color", team.getName()));
-        setSize(6 * 9);
-        insertColors(2);
-    }
-
-    @Override
-    protected void saveColor(TeamColor color)
-    {
-        team.setColor(color);
-        Gui.open(getPlayer(), new TeamEditGUI(team), getParent().getParent());
+        if (player1.isOnline() == player2.isOnline())
+        {
+            return player1.getName().toLowerCase().compareTo(player2.getName().toLowerCase());
+        }
+        else if (player1.isOnline())
+        {
+            return -1;
+        }
+        else
+        {
+            return 1;
+        }
     }
 }

@@ -31,15 +31,15 @@
  */
 package fr.zcraft.zteams.guis.builder;
 
-import eu.carrade.amaury.UHCReloaded.teams.TeamColor;
-import eu.carrade.amaury.UHCReloaded.utils.ColorsUtils;
-import eu.carrade.amaury.UHCReloaded.utils.TextUtils;
 import fr.zcraft.zlib.components.gui.Gui;
 import fr.zcraft.zlib.components.gui.GuiAction;
 import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.i18n.I;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import fr.zcraft.zlib.tools.runners.RunTask;
+import fr.zcraft.zteams.colors.ColorsUtils;
+import fr.zcraft.zteams.colors.TeamColor;
+import fr.zcraft.zteams.texts.TextUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

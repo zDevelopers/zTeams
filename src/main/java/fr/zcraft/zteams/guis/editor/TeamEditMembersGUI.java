@@ -31,15 +31,15 @@
  */
 package fr.zcraft.zteams.guis.editor;
 
-import eu.carrade.amaury.UHCReloaded.UHCReloaded;
-import eu.carrade.amaury.UHCReloaded.misc.OfflinePlayersLoader;
-import eu.carrade.amaury.UHCReloaded.teams.UHTeam;
-import eu.carrade.amaury.UHCReloaded.utils.OfflinePlayersComparator;
 import fr.zcraft.zlib.components.gui.ExplorerGui;
 import fr.zcraft.zlib.components.gui.GuiAction;
 import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.i18n.I;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
+import fr.zcraft.zteams.ZTeam;
+import fr.zcraft.zteams.ZTeams;
+import fr.zcraft.zteams.guis.utils.OfflinePlayersComparator;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.SkullType;
@@ -47,15 +47,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
 
 
 public class TeamEditMembersGUI extends ExplorerGui<OfflinePlayer>
 {
-    private final UHTeam team;
+    private final ZTeam team;
 
-    public TeamEditMembersGUI(UHTeam team)
+    public TeamEditMembersGUI(ZTeam team)
     {
         this.team = team;
     }
@@ -69,7 +70,7 @@ public class TeamEditMembersGUI extends ExplorerGui<OfflinePlayer>
         setKeepHorizontalScrollingSpace(true);
 
         final Set<OfflinePlayer> players = new TreeSet<>(new OfflinePlayersComparator());
-        players.addAll(OfflinePlayersLoader.getOfflinePlayers());
+        Collections.addAll(players, Bukkit.getOfflinePlayers());
         setData(players.toArray(new OfflinePlayer[0]));
 
         action("back", getSize() - 5, GuiUtils.makeItem(
@@ -82,7 +83,7 @@ public class TeamEditMembersGUI extends ExplorerGui<OfflinePlayer>
     protected ItemStack getViewItem(OfflinePlayer player)
     {
         final String displayName = player instanceof Player ? ((Player) player).getDisplayName() : player.getName();
-        final UHTeam team = UHCReloaded.get().getTeamManager().getTeamForPlayer(player);
+        final ZTeam team = ZTeams.get().getTeamForPlayer(player);
 
         final boolean inThisTeam = this.team.equals(team);
 

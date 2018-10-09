@@ -31,28 +31,25 @@
  */
 package fr.zcraft.zteams.guis.editor;
 
-import eu.carrade.amaury.UHCReloaded.teams.UHTeam;
-import eu.carrade.amaury.UHCReloaded.utils.ColorsUtils;
-import eu.carrade.amaury.UHCReloaded.utils.TextUtils;
 import fr.zcraft.zlib.components.gui.Gui;
 import fr.zcraft.zlib.components.gui.GuiAction;
 import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.gui.PromptGui;
 import fr.zcraft.zlib.components.i18n.I;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
+import fr.zcraft.zteams.ZTeam;
+import fr.zcraft.zteams.ZTeamsPermission;
+import fr.zcraft.zteams.colors.ColorsUtils;
+import fr.zcraft.zteams.texts.TextUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 public class TeamEditGUI extends TeamActionGUI
 {
-    public TeamEditGUI(UHTeam team)
+    public TeamEditGUI(ZTeam team)
     {
         super(team);
     }
@@ -71,48 +68,95 @@ public class TeamEditGUI extends TeamActionGUI
             return;
         }
 
-        // Banner
-        action("banner", 9, new ItemStackBuilder(team.getBanner())
+
+        /* *** Banner *** */
+
+        final ItemStackBuilder bannerButton = new ItemStackBuilder(team.getBanner())
                 .title(team.getDisplayName())
-                 /// Members count in the banner description, in the team edit GUI.
-                .lore(GuiUtils.generateLore(I.tn("{white}{0} {gray}member", "{white}{0} {gray}members", team.getSize(), team.getSize())))
-                .lore(" ")
-                .lore(GuiUtils.generateLore(I.t("{white}Click with a banner {gray}to update this team's banner")))
-                .hideAttributes()
-        );
+                /// Members count in the banner description, in the team edit GUI.
+                .longLore(I.tn("{white}{0} {gray}member", "{white}{0} {gray}members", team.getSize(), team.getSize()))
+                .lore(" ").hideAttributes();
 
-        // Color
-        action("color", 11, GuiUtils.makeItem(
-                new ItemStack(Material.WOOL, 1, ColorsUtils.chat2Dye(team.getColorOrWhite().toChatColor()).getWoolData()),
+        if (ZTeamsPermission.UPDATE_TEAM_BANNER.grantedTo(getPlayer()))
+            bannerButton.longLore(I.t("{white}Click with a banner {gray}to update this team's banner"));
+        else
+            bannerButton.longLore(I.t("{gray}You're not allowed to update this team's banner."));
+
+        action("banner", 9, bannerButton);
+
+
+        /* *** Color *** */
+
+        final ItemStackBuilder colorButton = new ItemStackBuilder(Material.WOOL)
+                .data(ColorsUtils.chat2Dye(team.getColorOrWhite().toChatColor()).getWoolData())
                 /// Update team color button in edit GUI.
-                I.t("{green}Update the color"),
-                /// Current team color in edit GUI. {0} = formatted color name.
-                GuiUtils.generateLore(I.tc("current_team_color", "{gray}Current: {white}{0}", team.getColorOrWhite().toChatColor() + TextUtils.friendlyEnumName(team.getColorOrWhite())))
-        ));
+                .title(I.t("{green}Update the color"))
+                .longLore(I.tc(
+                    /// Current team color in edit GUI. {0} = formatted color name.
+                    "current_team_color", "{gray}Current: {white}{0}",
+                    team.getColorOrWhite().toChatColor() + TextUtils.friendlyEnumName(team.getColorOrWhite())
+                ));
 
-        // Name
-        action("name", 13, GuiUtils.makeItem(
-                Material.BOOK_AND_QUILL,
+        if (!ZTeamsPermission.UPDATE_TEAM_COLOR.grantedTo(getPlayer()))
+            colorButton.lore(" ").longLore(I.t("{gray}You're not allowed to update this team's color."));
+
+        action("color", 11, colorButton);
+
+
+        /* *** Name *** */
+
+        final ItemStackBuilder nameButton = new ItemStackBuilder(Material.BOOK_AND_QUILL)
                 /// Rename team button in edit GUI.
-                I.t("{green}Rename the team"),
+                .title(I.t("{green}Rename the team"))
                 /// Current team name in edit GUI. {0} = raw team name.
-                GuiUtils.generateLore(I.tc("current_team_name", "{gray}Current: {white}{0}", team.getName()))
-        ));
+                .longLore(I.tc("current_team_name", "{gray}Current: {white}{0}", team.getName()));
 
-        // Members
-        List<String> lore = new ArrayList<>();
+        if (!ZTeamsPermission.UPDATE_TEAM_NAME.grantedTo(getPlayer()))
+            nameButton.lore(" ").longLore(I.t("{gray}You're not allowed to update this team's name."));
+
+        action("name", 13, nameButton);
+
+
+        /* *** Members *** */
+
+        final ItemStackBuilder membersButton = new ItemStackBuilder(Material.SKULL_ITEM).data((short) 3);
+
         for (OfflinePlayer player : team.getPlayers())
+        {
             if (player.isOnline())
-                lore.add(I.t("{green} • ") + ChatColor.RESET + player.getName());
+                membersButton.lore(I.t("{green} • ") + ChatColor.RESET + player.getName());
             else
-                lore.add(I.t("{red} • ") + ChatColor.RESET + player.getName());
+                membersButton.lore(I.t("{red} • ") + ChatColor.RESET + player.getName());
+        }
 
-        action("members", 15, GuiUtils.makeItem(
-                new ItemStack(Material.SKULL_ITEM, 1, (short) 3),
+        if (ZTeamsPermission.UPDATE_TEAMS_PLAYERS_LIST.grantedTo(getPlayer()))
+        {
+            membersButton
                 /// Update team members button in edit GUI.
-                I.t("{green}Add or remove players"),
-                lore
-        ));
+                .title(I.t("{green}Add or remove players"))
+                .lore(" ").longLore(I.t("{white}Click {gray}to add or remove players"));
+        }
+        else
+        {
+            membersButton
+                .title(I.t("{green}Players list"))
+                .lore(" ").longLore(I.t("{gray}You're not allowed to add or remove players."));
+        }
+
+        action("members", 15, membersButton);
+
+
+        /* *** Delete *** */
+
+        final ItemStackBuilder deleteButton = new ItemStackBuilder(Material.BARRIER)
+                /// Delete team button in edit GUI.
+                .title(I.t("{red}Delete this team"));
+
+        if (ZTeamsPermission.DELETE_TEAM.grantedTo(getPlayer()))
+            deleteButton.longLore(I.t("{gray}Cannot be undone"));
+        else
+            deleteButton.longLore(I.t("{gray}You're not allowed to delete this team."));
+
 
         // Delete
         action("delete", 17, GuiUtils.makeItem(
@@ -135,6 +179,8 @@ public class TeamEditGUI extends TeamActionGUI
     @GuiAction ("banner")
     protected void banner(InventoryClickEvent ev)
     {
+        if (!ZTeamsPermission.UPDATE_TEAM_BANNER.grantedTo(getPlayer())) return;
+
         if (ev.getCursor() != null && ev.getCursor().getType() == Material.BANNER)
         {
             team.setBanner(ev.getCursor());
@@ -145,27 +191,28 @@ public class TeamEditGUI extends TeamActionGUI
     @GuiAction ("color")
     protected void color()
     {
+        if (!ZTeamsPermission.UPDATE_TEAM_COLOR.grantedTo(getPlayer())) return;
         Gui.open(getPlayer(), new TeamEditColorGUI(team), this);
     }
 
     @GuiAction ("name")
     protected void name()
     {
-        Gui.open(getPlayer(), new PromptGui(name ->
-        {
-            if (!name.trim().isEmpty()) team.setName(name);
-        }, team.getName()), this);
+        if (!ZTeamsPermission.UPDATE_TEAM_NAME.grantedTo(getPlayer())) return;
+        Gui.open(getPlayer(), new PromptGui(name -> { if (!name.trim().isEmpty()) team.setName(name); }, team.getName()), this);
     }
 
     @GuiAction ("members")
     protected void members()
     {
+        if (!ZTeamsPermission.UPDATE_TEAMS_PLAYERS_LIST.grantedTo(getPlayer())) return;
         Gui.open(getPlayer(), new TeamEditMembersGUI(team), this);
     }
 
     @GuiAction ("delete")
     protected void delete()
     {
+        if (!ZTeamsPermission.DELETE_TEAM.grantedTo(getPlayer())) return;
         Gui.open(getPlayer(), new TeamEditDeleteGUI(team), this);
     }
 

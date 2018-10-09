@@ -31,12 +31,12 @@
  */
 package fr.zcraft.zteams.guis.builder;
 
-import eu.carrade.amaury.UHCReloaded.teams.TeamColor;
 import fr.zcraft.zlib.components.gui.Gui;
 import fr.zcraft.zlib.components.gui.GuiAction;
 import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.gui.PromptGui;
 import fr.zcraft.zlib.components.i18n.I;
+import fr.zcraft.zteams.colors.TeamColor;
 import org.bukkit.Material;
 
 

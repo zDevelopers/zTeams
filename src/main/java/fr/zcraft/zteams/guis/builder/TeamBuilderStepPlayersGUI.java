@@ -31,17 +31,16 @@
  */
 package fr.zcraft.zteams.guis.builder;
 
-import eu.carrade.amaury.UHCReloaded.UHCReloaded;
-import eu.carrade.amaury.UHCReloaded.gui.teams.TeamsSelectorGUI;
-import eu.carrade.amaury.UHCReloaded.misc.OfflinePlayersLoader;
-import eu.carrade.amaury.UHCReloaded.teams.TeamColor;
-import eu.carrade.amaury.UHCReloaded.teams.UHTeam;
-import eu.carrade.amaury.UHCReloaded.utils.OfflinePlayersComparator;
-import eu.carrade.amaury.UHCReloaded.utils.TextUtils;
 import fr.zcraft.zlib.components.gui.Gui;
 import fr.zcraft.zlib.components.gui.GuiAction;
-import fr.zcraft.zlib.components.gui.GuiUtils;
 import fr.zcraft.zlib.components.i18n.I;
+import fr.zcraft.zlib.tools.items.ItemStackBuilder;
+import fr.zcraft.zteams.ZTeam;
+import fr.zcraft.zteams.ZTeams;
+import fr.zcraft.zteams.colors.TeamColor;
+import fr.zcraft.zteams.guis.TeamsSelectorGUI;
+import fr.zcraft.zteams.guis.utils.OfflinePlayersComparator;
+import fr.zcraft.zteams.texts.TextUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -51,10 +50,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -84,13 +83,13 @@ public class TeamBuilderStepPlayersGUI extends TeamBuilderBaseGUI
         generateBreadcrumbs(BuildingStep.PLAYERS);
 
 
-        // Players
+        /* *** Players *** */
 
         final Set<OfflinePlayer> players = new TreeSet<>(new OfflinePlayersComparator());
-        players.addAll(OfflinePlayersLoader.getOfflinePlayers());
+        Collections.addAll(players, Bukkit.getOfflinePlayers());
 
         int slot = 9;
-        for (OfflinePlayer player : players)
+        for (final OfflinePlayer player : players)
         {
             action(player.getUniqueId().toString(), slot, generatePlayerButton(player));
 
@@ -99,42 +98,44 @@ public class TeamBuilderStepPlayersGUI extends TeamBuilderBaseGUI
         }
 
 
-        // Done button
+        /* *** Done button *** */
 
-        final List<String> lore = new ArrayList<>();
-        lore.add("");
+        final ItemStackBuilder doneButton = new ItemStackBuilder(Material.EMERALD)
+                /// The title of the final « create the team » button of the create team GUIs
+                .title(I.t("{green}Create the team"))
+                .lore(" ")
 
-        /// The summary title in the final « create the team » button of the create team GUIs
-        lore.add(I.t("{blue}{bold}Summary"));
+                /// The summary title in the final « create the team » button of the create team GUIs
+                .lore(I.t("{blue}{bold}Summary"))
 
-        /// The team name in the final « create the team » button of the create team GUIs
-        lore.add(I.t("{gray}Team name: {white}{0}", getName()));
+                /// The team name in the final « create the team » button of the create team GUIs
+                .longLore(I.t("{gray}Team name: {white}{0}", getName()))
 
-        /// The team color in the final « create the team » button of the create team GUIs
-        lore.add(I.t("{gray}Color: {0}", getColor() == TeamColor.RANDOM ? ChatColor.MAGIC + "Random" : getColor().toChatColor() + TextUtils.friendlyEnumName(getColor())));
+                /// The team color in the final « create the team » button of the create team GUIs
+                .longLore(I.t("{gray}Color: {0}", getColor() == TeamColor.RANDOM ? ChatColor.MAGIC + "Random" : getColor().toChatColor() + TextUtils.friendlyEnumName(getColor())))
 
-        /// The team members count in the final « create the team » button of the create team GUIs
-        lore.add(I.t("{gray}Members: {white}{0}", teamMembers.size()));
-        lore.add("");
+                /// The team members count in the final « create the team » button of the create team GUIs
+                .longLore(I.t("{gray}Members: {white}{0}", teamMembers.size()))
+
+                .lore(" ");
 
         for (UUID teamMember : teamMembers)
         {
             OfflinePlayer player = Bukkit.getOfflinePlayer(teamMember);
             /// A member bullet in the final « create the team » button of the create team GUIs
-            lore.add(I.t("{darkgray}- {white}{0}", player != null ? player.getName() : teamMember));
+            doneButton.lore(I.t("{darkgray}- {white}{0}", player != null ? player.getName() : teamMember));
         }
 
-        /// The title of the final « create the team » button of the create team GUIs
-        action("done", getSize() - 5, GuiUtils.makeItem(Material.EMERALD, I.t("{green}Create the team"), lore));
+        action("done", getSize() - 5, doneButton);
     }
 
     private ItemStack generatePlayerButton(OfflinePlayer player)
     {
-        ItemStack button = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-        SkullMeta meta = (SkullMeta) button.getItemMeta();
+        final ItemStack button = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+        final SkullMeta meta = (SkullMeta) button.getItemMeta();
 
-        String displayName = player instanceof Player ? ((Player) player).getDisplayName() : player.getName();
-        UHTeam team = UHCReloaded.get().getTeamManager().getTeamForPlayer(player);
+        final String displayName = player instanceof Player ? ((Player) player).getDisplayName() : player.getName();
+        final ZTeam team = ZTeams.get().getTeamForPlayer(player);
 
         meta.setOwner(player.getName());
         /// The title of a button to select a player (a skull button). {0} = player's display name.
@@ -168,14 +169,14 @@ public class TeamBuilderStepPlayersGUI extends TeamBuilderBaseGUI
     @GuiAction ("done")
     protected void done()
     {
-        UHTeam team = new UHTeam(getName(), getColor());
+        final ZTeam team = ZTeams.get().teamsCreator().createTeam(getName(), getColor());
 
         try
         {
-            UHCReloaded.get().getTeamManager().addTeam(team);
+            ZTeams.get().registerTeam(team);
             getPlayer().sendMessage(I.t("{cs}Team created."));
 
-            teamMembers.stream().map(OfflinePlayersLoader::getOfflinePlayer).forEach(team::addPlayer);
+            teamMembers.stream().map(Bukkit::getOfflinePlayer).filter(Objects::nonNull).forEach(team::addPlayer);
         }
         catch (IllegalArgumentException e)
         {

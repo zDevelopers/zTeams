@@ -29,37 +29,41 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zteams.guis.editor;
-
-import fr.zcraft.zlib.components.gui.Gui;
-import fr.zcraft.zlib.components.i18n.I;
-import fr.zcraft.zteams.ZTeam;
-import fr.zcraft.zteams.colors.TeamColor;
-import fr.zcraft.zteams.guis.builder.TeamBuilderStepColorGUI;
+package fr.zcraft.zteams.guis;
 
 
-public class TeamEditColorGUI extends TeamBuilderStepColorGUI
+/**
+ * Represents the type of item used to represent the teams on the GUIs.
+ */
+public enum TeamsGUIItemType
 {
-    private final ZTeam team;
+    /**
+     * The teams' banners.
+     */
+    BANNER,
 
-    public TeamEditColorGUI(ZTeam team)
-    {
-        this.team = team;
-    }
+    /**
+     * A stained clay block.
+     */
+    CLAY,
 
-    @Override
-    protected void onUpdate()
-    {
-        /// The title of the edit team color GUI. {0} = team name (raw).
-        setTitle(I.t("{0} » {black}Color", team.getName()));
-        setSize(6 * 9);
-        insertColors(2);
-    }
+    /**
+     * A glass block.
+     */
+    GLASS,
 
-    @Override
-    protected void saveColor(TeamColor color)
-    {
-        team.setColor(color);
-        Gui.open(getPlayer(), new TeamEditGUI(team), getParent().getParent());
-    }
+    /**
+     * A glass pane.
+     */
+    GLASS_PANE,
+
+    /**
+     * A dye
+     */
+    DYE,
+
+    /**
+     * A block of stained wool.
+     */
+    WOOL
 }

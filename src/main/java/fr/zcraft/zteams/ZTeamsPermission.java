@@ -33,7 +33,10 @@
  */
 package fr.zcraft.zteams;
 
-public enum ZTeamsPermissions
+import org.bukkit.permissions.Permissible;
+
+
+public enum ZTeamsPermission
 {
     CREATE_TEAM("Allows an user to create a team", false),
     DELETE_TEAM("Allows an user to delete a team", true),
@@ -41,8 +44,7 @@ public enum ZTeamsPermissions
     JOIN_TEAM("Allows an user to join a team", false),
     LEAVE_TEAM("Allows an user to leave a team", false),
 
-    PUT_PLAYER_INTO_TEAM("Allows an user to put another player into a team", true),
-    REMOVE_PLAYER_FROM_TEAM("Allows an user to remove another player from its team", true),
+    UPDATE_TEAMS_PLAYERS_LIST("Allows an user to add or remove players from teams", true),
 
     UPDATE_TEAM_NAME("Allows an user to update its own team name", false),
     UPDATE_TEAM_COLOR("Allows an user to update its own team color", false),
@@ -58,20 +60,38 @@ public enum ZTeamsPermissions
     private final String description;
     private final boolean administrative;
 
-    private ZTeamsPermissions(final String description, final boolean administrative)
+    private ZTeamsPermission(final String description, final boolean administrative)
     {
 
         this.description = description;
         this.administrative = administrative;
     }
 
+    /**
+     * @return A description of the permission in English.
+     */
     public String getDescription()
     {
         return description;
     }
 
+    /**
+     * @return {@code true} if the permission is considered as administrative.
+     */
     public boolean isAdministrative()
     {
         return administrative;
+    }
+
+    /**
+     * Checks if the permission is granted to the given permissible using the registered
+     * {@linkplain fr.zcraft.zteams.permissions.PermissionsChecker permissions checker}.
+     *
+     * @param permissible The permissible.
+     * @return {@code true} if the permission is granted.
+     */
+    public boolean grantedTo(Permissible permissible)
+    {
+        return ZTeams.get().permissionsChecker().hasPermission(permissible, this);
     }
 }

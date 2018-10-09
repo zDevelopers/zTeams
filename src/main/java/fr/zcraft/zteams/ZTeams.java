@@ -33,12 +33,15 @@
  */
 package fr.zcraft.zteams;
 
-import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zteams.colors.TeamColor;
+import fr.zcraft.zteams.creator.DefaultZTeamCreator;
+import fr.zcraft.zteams.creator.ZTeamCreator;
 import fr.zcraft.zteams.events.TeamChangedEvent;
 import fr.zcraft.zteams.events.TeamRegisteredEvent;
 import fr.zcraft.zteams.events.TeamUnregisteredEvent;
+import fr.zcraft.zteams.permissions.OpBasedPermissionsChecker;
+import fr.zcraft.zteams.permissions.PermissionsChecker;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -46,9 +49,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -64,16 +67,10 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
 {
     private static ZTeams instance;
 
-    private Scoreboard scoreboard = null;
+    private final ZTeamsSettings settings = new ZTeamsSettings();
 
-    private boolean bannerShapeWriteLetter = true;
-    private boolean bannerShapeAddBorder = false;
-
-    private boolean teamsOptionsSeeFriendlyInvisibles = true;
-    private boolean teamsOptionsFriendlyFire = true;
-    private boolean teamsOptionsColorizeChat = true;
-
-    private int maxPlayersPerTeam = 0;
+    private PermissionsChecker permissionsChecker = new OpBasedPermissionsChecker();
+    private ZTeamCreator teamsCreator = new DefaultZTeamCreator();
 
     private Set<T> teams = new HashSet<>();
 
@@ -92,8 +89,33 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
         return instance;
     }
 
+    /**
+     * @return The zTeams settings.
+     */
+    public static ZTeamsSettings settings()
+    {
+        return get().settings;
+    }
+
+
 
     /* *** Teams getters *** */
+
+    /**
+     * @return All the registered teams.
+     */
+    public Set<T> getTeams()
+    {
+        return Collections.unmodifiableSet(teams);
+    }
+
+    /**
+     * @return All the registered teams, as an array.
+     */
+    public T[] getTeamsArray()
+    {
+        return (T[]) teams.toArray();
+    }
 
     /**
      * Finds a team by name (ignoring case and extra spaces around).
@@ -104,6 +126,15 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
     public T getTeamByName(final String name)
     {
         return teams.stream().filter(team -> team.getName().trim().equalsIgnoreCase(name)).findFirst().orElse(null);
+    }
+
+
+    /**
+     * @return The amount of registered teams.
+     */
+    public int countTeams()
+    {
+        return teams.size();
     }
 
 
@@ -173,7 +204,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
      */
     boolean removePlayerFromTeam(final UUID playerID, boolean becauseJoin)
     {
-        T team = getTeamForPlayer(playerID);
+        final T team = getTeamForPlayer(playerID);
 
         if (team != null)
         {
@@ -222,6 +253,17 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
         new HashSet<>(teams).forEach(ZTeam::deleteTeam);
     }
 
+    /**
+     * Checks if the given team is registered.
+     *
+     * @param team The team.
+     * @return {@code true} if registered.
+     */
+    public boolean isTeamRegistered(T team)
+    {
+        return teams.contains(team);
+    }
+
 
 
     /* *** ZTeams internal management methods *** */
@@ -229,7 +271,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
 
     void colorizePlayer(final OfflinePlayer offlinePlayer)
     {
-        if (!teamsOptionsColorizeChat)
+        if (!settings.teamsOptionsColorizeChat())
         {
             return;
         }
@@ -292,138 +334,60 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
     @EventHandler
     public void onTeamChanged(final TeamChangedEvent ev)
     {
-        // TODO updateGUIs();
+        updateGUIs();
     }
 
 
 
-    /* *** ZTeams configuration methods *** */
+    /* *** ZTeams permissions methods *** */
 
 
     /**
-     * @return The Minecraft scoreboard the teams will use.
+     * @return The internal permissions checker.
      */
-    public Scoreboard getScoreboard()
+    public PermissionsChecker permissionsChecker()
     {
-        return scoreboard != null ? scoreboard : ZLib.getPlugin().getServer().getScoreboardManager().getMainScoreboard();
+        return permissionsChecker;
     }
 
     /**
-     * Sets the scoreboard to be used by the teams to be displayed and registered into Bukkit.
+     * Sets the permissions checker used to grant access to commands or GUIs actions to players.
      *
-     * If this is never set, or reset by setting the scoreboard to {@code null}, the main Bukkit scoreboard
-     * will be used.
+     * If not set, a default {@linkplain OpBasedPermissionsChecker op-based permissions checker} is used,
+     * granting permissions to operators or to any player for non-administrative actions.
      *
-     * @param scoreboard The scoreboard to use.
+     * @param permissionsChecker The permissions checker to use.
      */
-    public static void setScoreboard(final Scoreboard scoreboard)
+    public static void setPermissionsChecker(PermissionsChecker permissionsChecker)
     {
-        get().scoreboard = scoreboard;
+        get().permissionsChecker = permissionsChecker;
+    }
+
+
+
+    /* *** ZTeams creation methods *** */
+
+
+    /**
+     * @return The internal teams creator.
+     */
+    public ZTeamCreator teamsCreator()
+    {
+        return teamsCreator;
     }
 
     /**
-     * @return {@code true} if the first meaningful letter of the team name should be written
-     * on the default team banners.
-     */
-    boolean bannerShapeWriteLetter()
-    {
-        return bannerShapeWriteLetter;
-    }
-
-    /**
-     * @return {@code true} if a border should be added to the default team banners.
-     */
-    boolean bannerShapeAddBorder()
-    {
-        return bannerShapeAddBorder;
-    }
-
-    /**
-     * @return {@code true} if the players should see their invisible teammates.
-     */
-    boolean teamsOptionsSeeFriendlyInvisibles()
-    {
-        return teamsOptionsSeeFriendlyInvisibles;
-    }
-
-    /**
-     * @return {@code true} if the PvP should be enabled between teammates.
-     */
-    boolean teamsOptionsFriendlyFire()
-    {
-        return teamsOptionsFriendlyFire;
-    }
-
-    boolean teamsOptionsColorizeChat()
-    {
-        return teamsOptionsColorizeChat;
-    }
-
-    /**
-     * @return The maximal number of players per team. {@code 0} means “no limit”.
-     */
-    int maxPlayersPerTeam()
-    {
-        return maxPlayersPerTeam;
-    }
-
-    /**
-     * Updates the settings followed to generate the default teams banners.
+     * Sets the teams creator used by the provided GUIs and commands to create teams.
      *
-     * All default banners will be regenerated when this method is called, according to the new settings.
+     * Override this if you want to provide your own subclassed team class with your custom
+     * attributes.
      *
-     * @param bannerShapeWriteLetter {@code true} if the first meaningful letter of the team name
-     *                               should be written on the default team banners.
-     * @param bannerShapeAddBorder {@code true} if a border should be added to the default team banners.
+     * @param teamsCreator The teams creator to use.
      */
-    public static void setBannerOptions(boolean bannerShapeWriteLetter, final boolean bannerShapeAddBorder)
+    public static void setTeamsCreator(ZTeamCreator<? extends ZTeam> teamsCreator)
     {
-        get().bannerShapeWriteLetter = bannerShapeWriteLetter;
-        get().bannerShapeAddBorder = bannerShapeAddBorder;
-
-        get().updateDefaultBanners();
+        get().teamsCreator = teamsCreator;
     }
-
-    /**
-     * Updates the teams options for all teams.
-     *
-     * All teams settings will be updated when this method is called.
-     *
-     * @param teamsOptionsSeeFriendlyInvisibles {@code true} if the players should see their invisible teammates.
-     * @param teamsOptionsFriendlyFire {@code true} if the PvP should be enabled between teammates.
-     * @param teamsOptionsColorizeChat {@code true} to colorize the players name in the chat (by setting their display
-     *                                 name including their team color).
-     */
-    public static void setTeamsOptions(boolean teamsOptionsSeeFriendlyInvisibles, boolean teamsOptionsFriendlyFire, boolean teamsOptionsColorizeChat)
-    {
-        get().teamsOptionsSeeFriendlyInvisibles = teamsOptionsSeeFriendlyInvisibles;
-        get().teamsOptionsFriendlyFire = teamsOptionsFriendlyFire;
-        get().teamsOptionsColorizeChat = teamsOptionsColorizeChat;
-
-        get().updateTeamsOptions();
-    }
-
-    /**
-     * Updates the maximal amount of players per team. If some teams overflow the new limits, players will not be kicked
-     * but new one will not be able to join.
-     *
-     * @param maxPlayersPerTeam The maximal number of players per team. {@code 0} to remove the limit (default value).
-     */
-    public static void setMaxPlayersPerTeam(int maxPlayersPerTeam)
-    {
-        get().maxPlayersPerTeam = maxPlayersPerTeam;
-    }
-
-    private void updateTeamsOptions()
-    {
-        teams.forEach(ZTeam::updateTeamOptions);
-    }
-
-    private void updateDefaultBanners()
-    {
-        teams.forEach(ZTeam::updateDefaultBanner);
-    }
-
 
 
     /* *** Utilities *** */
@@ -437,5 +401,21 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
     static void fireEvent(Event event)
     {
         Bukkit.getPluginManager().callEvent(event);
+    }
+
+
+    void updateTeamsOptions()
+    {
+        teams.forEach(ZTeam::updateTeamOptions);
+    }
+
+    void updateDefaultBanners()
+    {
+        teams.forEach(ZTeam::updateDefaultBanner);
+    }
+
+    public void updateGUIs()
+    {
+        // TODO
     }
 }

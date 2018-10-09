@@ -29,51 +29,17 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.zteams.guis.editor;
+package fr.zcraft.zteams.creator;
 
-import fr.zcraft.zlib.components.gui.ActionGui;
-import fr.zcraft.zlib.components.gui.GuiUtils;
-import fr.zcraft.zlib.components.i18n.I;
-import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import fr.zcraft.zteams.ZTeam;
-import fr.zcraft.zteams.ZTeams;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
+import fr.zcraft.zteams.colors.TeamColor;
 
 
-public abstract class TeamActionGUI extends ActionGui
+public class DefaultZTeamCreator implements ZTeamCreator<ZTeam>
 {
-    protected final ZTeam team;
-
-    public TeamActionGUI(ZTeam team)
+    @Override
+    public ZTeam createTeam(String name, TeamColor color)
     {
-        this.team = team;
-    }
-
-    /**
-     * Checks if the team still exists.
-     * @return {@code true} if the team exists.
-     */
-    protected boolean exists()
-    {
-        return ZTeams.get().isTeamRegistered(team);
-    }
-
-    /**
-     * Generates the item to display if the team was deleted while a player edited the team on a GUI.
-     * @return the item.
-     */
-    protected ItemStack getDeletedItem()
-    {
-        return new ItemStackBuilder(Material.BARRIER)
-                /// Title of the item displayed if a team was deleted while someone edited it in a GUI.
-                .title(I.t("{red}Team deleted"))
-                /// Lore of the item displayed if a team was deleted while someone edited it in a GUI.
-                .lore(GuiUtils.generateLore(I.t("{gray}The team {0}{gray} was deleted by another player.", team.getDisplayName())))
-                .lore("")
-                /// Lore of the item displayed if a team was deleted while someone edited it in a GUI.
-                .lore(GuiUtils.generateLore(I.t("{gray}Press {white}Escape{gray} to go back to the teams list.")))
-                .hideAttributes()
-                .item();
+        return new ZTeam(name, color);
     }
 }
