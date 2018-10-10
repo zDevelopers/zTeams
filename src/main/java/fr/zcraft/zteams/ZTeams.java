@@ -224,9 +224,13 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
      * Registers a new team.
      *
      * @param team The team.
+     * @throws IllegalArgumentException if duplicated teams are disabled and there is another team with the same name.
      */
-    public void registerTeam(T team)
+    public void registerTeam(T team) throws IllegalArgumentException
     {
+        if (!settings.teamsOptionsAllowDuplicatedNames() && isTeamRegistered(team.getName()))
+            throw new IllegalArgumentException("There is already a team registered with this name, and it's disallowed by the ZTeams configuration.");
+
         teams.add(team);
         fireEvent(new TeamRegisteredEvent(team));
     }
@@ -262,6 +266,17 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
     public boolean isTeamRegistered(T team)
     {
         return teams.contains(team);
+    }
+
+    /**
+     * Checks if there is a team registered with this name (case-insensitive).
+     *
+     * @param teamName The team's name.
+     * @return {@code true} if registered.
+     */
+    public boolean isTeamRegistered(String teamName)
+    {
+        return teams.stream().anyMatch(team -> team.getName().trim().equalsIgnoreCase(teamName.trim()));
     }
 
 
@@ -371,7 +386,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
     /**
      * @return The internal teams creator.
      */
-    public ZTeamCreator teamsCreator()
+    public ZTeamCreator<T> teamsCreator()
     {
         return teamsCreator;
     }

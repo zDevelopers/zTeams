@@ -606,7 +606,7 @@ public class ZTeam
     @Override
     public int hashCode()
     {
-        return ((internalName == null) ? 0 : internalName.hashCode());
+        return ((name == null) ? 0 : name.hashCode());
     }
 
     @Override

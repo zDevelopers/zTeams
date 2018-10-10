@@ -35,7 +35,7 @@ import fr.zcraft.zteams.ZTeam;
 import fr.zcraft.zteams.colors.TeamColor;
 
 
-public class DefaultZTeamCreator implements ZTeamCreator<ZTeam>
+public class DefaultZTeamCreator<T extends ZTeam> implements ZTeamCreator<ZTeam>
 {
     @Override
     public ZTeam createTeam(String name, TeamColor color)

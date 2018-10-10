@@ -34,6 +34,8 @@ package fr.zcraft.zteams.texts;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang.WordUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 
@@ -135,5 +137,91 @@ public final class TextUtils
     public static String friendlyEnumName(Enum<?> enumConstant)
     {
         return WordUtils.capitalizeFully(enumConstant.name().replace("_", " "));
+    }
+
+    public static String[] extractArgsWithQuotes(final String[] args, final int startIndex)
+    {
+        final StringBuilder rawArgsBuilder = new StringBuilder();
+        for (int i = startIndex; i < args.length; i++)
+        {
+            rawArgsBuilder.append(args[i]).append(" ");
+        }
+
+        final String rawArgs = rawArgsBuilder.toString().trim();
+        final List<String> realArgs = new ArrayList<>();
+
+        StringBuilder currentArg = new StringBuilder();
+        boolean inQuotes = false;
+
+        final char[] chars = rawArgs.toCharArray();
+
+        for (int i = 0, length = chars.length; i < length; i++)
+        {
+            final char c = chars[i];
+
+            // Space separates args if outside of quotes
+            if (c == ' ' && !inQuotes)
+            {
+                if (currentArg.length() != 0)
+                {
+                    realArgs.add(currentArg.toString());
+                    currentArg = new StringBuilder();
+                }
+            }
+
+            // We've got a quote.
+            else if (c == '"')
+            {
+                // Escaped quotes are left as-is
+                if (i != 0 && chars[i - 1] == '\\')
+                {
+                    currentArg.append(c);
+                }
+
+                // Starts a new arg.
+                else if (!inQuotes)
+                {
+                    inQuotes = true;
+                    if (currentArg.length() != 0)
+                    {
+                        realArgs.add(currentArg.toString());
+                        currentArg = new StringBuilder();
+                    }
+                }
+
+                // Ends the arg
+                else
+                {
+                    inQuotes = false;
+                    if (currentArg.length() != 0)
+                    {
+                        realArgs.add(currentArg.toString());
+                        currentArg = new StringBuilder();
+                    }
+                }
+            }
+
+            // Escape character not added if before a quote
+            else if (c == '\\')
+            {
+                if (i == length - 1 || chars[i + 1] != '"')
+                {
+                    currentArg.append(c);
+                }
+            }
+
+            // Other characters
+            else
+            {
+                currentArg.append(c);
+            }
+        }
+
+        if (currentArg.length() != 0)
+        {
+            realArgs.add(currentArg.toString());
+        }
+
+        return realArgs.toArray(new String[0]);
     }
 }

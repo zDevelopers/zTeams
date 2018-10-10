@@ -40,6 +40,7 @@ public enum ZTeamsPermission
 {
     CREATE_TEAM("Allows an user to create a team", false),
     DELETE_TEAM("Allows an user to delete a team", true),
+    RESET_TEAMS("Allows an user to delete all teams", true),
 
     JOIN_TEAM("Allows an user to join a team", false),
     LEAVE_TEAM("Allows an user to leave a team", false),
@@ -52,8 +53,9 @@ public enum ZTeamsPermission
 
     UPDATE_OTHER_TEAM_NAME("Allows an user to update another team name", true),
     UPDATE_OTHER_TEAM_COLOR("Allows an user to update another team color", true),
-    UPATE_OTHER_TEAM_BANNER("Allows an user to update another team banner", true),
+    UPDATE_OTHER_TEAM_BANNER("Allows an user to update another team banner", true),
 
+    SPY_TEAM_CHAT("Allows an user to see the private team chat of another team", true)
     ;
 
 
@@ -62,7 +64,6 @@ public enum ZTeamsPermission
 
     private ZTeamsPermission(final String description, final boolean administrative)
     {
-
         this.description = description;
         this.administrative = administrative;
     }
