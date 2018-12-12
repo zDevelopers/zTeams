@@ -123,6 +123,11 @@ public class ToggleChatCommand extends Command
                 {
                     success(I.t("{cs}You are now chatting with the team {0}{cs}.", team.getDisplayName()));
                     info(I.t("To exit, execute {0}", build()));
+
+                    if (!ZTeamsPermission.TALK_IN_OTHER_TEAM_CHAT.grantedTo(sender))
+                    {
+                        info(I.t("{gray}{bold}Warning:{gray} you are not allowed to talk to the team. Even if you're spying the team's private chat, your messages will go to the global chat."));
+                    }
                 }
             }
             else

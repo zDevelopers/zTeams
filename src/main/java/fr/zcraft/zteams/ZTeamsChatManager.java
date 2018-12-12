@@ -395,7 +395,7 @@ public class ZTeamsChatManager extends ZLibComponent implements Listener
                 ev.setCancelled(true);
                 sendTeamMessage(ev.getPlayer(), ev.getMessage());
             }
-            else if (isOtherTeamChatEnabled(ev.getPlayer()))
+            else if (isOtherTeamChatEnabled(ev.getPlayer()) && ZTeamsPermission.TALK_IN_OTHER_TEAM_CHAT.grantedTo(ev.getPlayer()))
             {
                 ev.setCancelled(true);
                 sendTeamMessage(ev.getPlayer(), ev.getMessage(), getOtherTeamEnabled(ev.getPlayer()));

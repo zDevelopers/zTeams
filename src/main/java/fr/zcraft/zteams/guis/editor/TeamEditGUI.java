@@ -58,9 +58,17 @@ public class TeamEditGUI extends TeamActionGUI
     @Override
     protected void onUpdate()
     {
-        /// The title of the edit team GUI. {0} = team display name.
-        setTitle(I.t("Teams » {black}{0}", team.getDisplayName()));
-        setSize(36);
+        if (getParent() != null)
+        {
+            /// The title of the edit team GUI. {0} = team display name.
+            setTitle(I.t("Teams » {black}{0}", team.getDisplayName()));
+        }
+        else
+        {
+            setTitle(ChatColor.BLACK + team.getDisplayName());
+        }
+
+        setSize(getParent() != null ? 36 : 27);
 
         if (!exists())
         {
@@ -168,11 +176,14 @@ public class TeamEditGUI extends TeamActionGUI
         ));
 
         // Exit
-        action("exit", getSize() - 5, GuiUtils.makeItem(
-                Material.EMERALD,
-                /// Go back button in GUIs.
-                I.t("{green}« Go back")
-        ));
+        if (getParent() != null)
+        {
+            action("exit", getSize() - 5, GuiUtils.makeItem(
+                    Material.EMERALD,
+                    /// Go back button in GUIs.
+                    I.t("{green}« Go back")
+            ));
+        }
     }
 
 
