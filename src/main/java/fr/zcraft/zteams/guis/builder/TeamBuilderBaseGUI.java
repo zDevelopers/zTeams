@@ -58,7 +58,7 @@ public abstract class TeamBuilderBaseGUI extends ActionGui
             {
                 action("", i, new ItemStackBuilder(Material.STAINED_GLASS_PANE)
                         .data(DyeColor.WHITE.getWoolData())
-                        .title(ChatColor.RESET, " ")
+                        .title(" ")
                 );
             }
             else

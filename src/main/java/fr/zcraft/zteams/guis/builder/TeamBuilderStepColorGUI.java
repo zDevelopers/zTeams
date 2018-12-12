@@ -108,7 +108,10 @@ public class TeamBuilderStepColorGUI extends TeamBuilderBaseGUI
             slot,
             new ItemStackBuilder(Material.WOOL)
                 .data(ColorsUtils.chat2Dye(color).getWoolData())
-                .title(color, TextUtils.friendlyEnumName(color))
+                // The color is extracted from the title, so it has to be directly inside,
+                // not as a JSON attribute.
+                // See #unknown_action(String, int, ItemStack).
+                .title(color + TextUtils.friendlyEnumName(color))
             .item()
         );
     }
@@ -124,7 +127,7 @@ public class TeamBuilderStepColorGUI extends TeamBuilderBaseGUI
     protected void unknown_action(String name, int slot, ItemStack item)
     {
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName())
-            saveColor(TeamColor.fromChatColor(ChatColor.getByChar(ChatColor.getLastColors(item.getItemMeta().getDisplayName()).substring(1))));
+            saveColor(TeamColor.fromChatColor(ChatColor.getByChar(ChatColor.getLastColors(item.getItemMeta().getDisplayName().replace(ChatColor.RESET.toString(), "")).substring(1))));
     }
 
     protected void saveColor(TeamColor color)

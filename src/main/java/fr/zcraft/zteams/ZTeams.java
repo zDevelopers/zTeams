@@ -33,13 +33,17 @@
  */
 package fr.zcraft.zteams;
 
+import fr.zcraft.zlib.components.gui.Gui;
+import fr.zcraft.zlib.core.ZLib;
 import fr.zcraft.zlib.core.ZLibComponent;
 import fr.zcraft.zteams.colors.TeamColor;
-import fr.zcraft.zteams.creator.DefaultZTeamCreator;
-import fr.zcraft.zteams.creator.ZTeamCreator;
 import fr.zcraft.zteams.events.TeamChangedEvent;
 import fr.zcraft.zteams.events.TeamRegisteredEvent;
 import fr.zcraft.zteams.events.TeamUnregisteredEvent;
+import fr.zcraft.zteams.guis.TeamsSelectorGUI;
+import fr.zcraft.zteams.guis.builder.TeamBuilderBaseGUI;
+import fr.zcraft.zteams.guis.editor.TeamActionGUI;
+import fr.zcraft.zteams.guis.editor.TeamEditMembersGUI;
 import fr.zcraft.zteams.permissions.OpBasedPermissionsChecker;
 import fr.zcraft.zteams.permissions.PermissionsChecker;
 import org.bukkit.Bukkit;
@@ -50,12 +54,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 
 /**
@@ -63,21 +62,24 @@ import java.util.UUID;
  *
  * {@code T} is your own {@link ZTeam} subclass.
  */
-public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
+public class ZTeams extends ZLibComponent implements Listener
 {
     private static ZTeams instance;
 
     private final ZTeamsSettings settings = new ZTeamsSettings();
 
     private PermissionsChecker permissionsChecker = new OpBasedPermissionsChecker();
-    private ZTeamCreator teamsCreator = new DefaultZTeamCreator();
 
-    private Set<T> teams = new HashSet<>();
+    private ZTeamsChatManager chatManager;
+
+    private Set<ZTeam> teams = new HashSet<>();
 
     @Override
     protected void onEnable()
     {
         instance = this;
+
+        chatManager = ZLib.loadComponent(ZTeamsChatManager.class);
     }
 
 
@@ -97,6 +99,14 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
         return get().settings;
     }
 
+    /**
+     * @return The zTeams chat manager (to handle private teams chats).
+     */
+    public static ZTeamsChatManager chatManager()
+    {
+        return get().chatManager;
+    }
+
 
 
     /* *** Teams getters *** */
@@ -104,7 +114,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
     /**
      * @return All the registered teams.
      */
-    public Set<T> getTeams()
+    public Set<ZTeam> getTeams()
     {
         return Collections.unmodifiableSet(teams);
     }
@@ -112,9 +122,9 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
     /**
      * @return All the registered teams, as an array.
      */
-    public T[] getTeamsArray()
+    public ZTeam[] getTeamsArray()
     {
-        return (T[]) teams.toArray();
+        return teams.toArray(new ZTeam[0]);
     }
 
     /**
@@ -123,7 +133,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
      * @param name The team name.
      * @return The {@link ZTeam}, or {@code null} if not found.
      */
-    public T getTeamByName(final String name)
+    public ZTeam getTeamByName(final String name)
     {
         return teams.stream().filter(team -> team.getName().trim().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
@@ -144,7 +154,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
      * @param player The player.
      * @return The team, or {@code null} if this player is not in a team.
      */
-    public T getTeamForPlayer(final OfflinePlayer player)
+    public ZTeam getTeamForPlayer(final OfflinePlayer player)
     {
         return getTeamForPlayer(player.getUniqueId());
     }
@@ -155,7 +165,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
      * @param playerID The player's UUID.
      * @return The team, or {@code null} if this player is not in a team.
      */
-    public T getTeamForPlayer(final UUID playerID)
+    public ZTeam getTeamForPlayer(final UUID playerID)
     {
         return teams.stream().filter(team -> team.containsPlayer(playerID)).findFirst().orElse(null);
     }
@@ -204,7 +214,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
      */
     boolean removePlayerFromTeam(final UUID playerID, boolean becauseJoin)
     {
-        final T team = getTeamForPlayer(playerID);
+        final ZTeam team = getTeamForPlayer(playerID);
 
         if (team != null)
         {
@@ -226,7 +236,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
      * @param team The team.
      * @throws IllegalArgumentException if duplicated teams are disabled and there is another team with the same name.
      */
-    public void registerTeam(T team) throws IllegalArgumentException
+    public void registerTeam(final ZTeam team) throws IllegalArgumentException
     {
         if (!settings.teamsOptionsAllowDuplicatedNames() && isTeamRegistered(team.getName()))
             throw new IllegalArgumentException("There is already a team registered with this name, and it's disallowed by the ZTeams configuration.");
@@ -241,7 +251,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
      * @param team The team.
      * @return {@code true} if the team was actually unregistered.
      */
-    public boolean unregisterTeam(T team)
+    public boolean unregisterTeam(final ZTeam team)
     {
         final boolean actuallyUnregistered = teams.remove(team);
         fireEvent(new TeamUnregisteredEvent(team));
@@ -263,7 +273,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
      * @param team The team.
      * @return {@code true} if registered.
      */
-    public boolean isTeamRegistered(T team)
+    public boolean isTeamRegistered(final ZTeam team)
     {
         return teams.contains(team);
     }
@@ -274,7 +284,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
      * @param teamName The team's name.
      * @return {@code true} if registered.
      */
-    public boolean isTeamRegistered(String teamName)
+    public boolean isTeamRegistered(final String teamName)
     {
         return teams.stream().anyMatch(team -> team.getName().trim().equalsIgnoreCase(teamName.trim()));
     }
@@ -297,7 +307,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
         }
 
         final Player player = (Player) offlinePlayer;
-        final T team = getTeamForPlayer(player);
+        final ZTeam team = getTeamForPlayer(player);
 
         if (team == null)
         {
@@ -318,7 +328,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
      * @param color The color to be generated.
      * @return A non-random color.
      */
-    TeamColor generateColor(TeamColor color)
+    TeamColor generateColor(final TeamColor color)
     {
         if (color != null && color != TeamColor.RANDOM)
         {
@@ -329,7 +339,7 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
         final Set<TeamColor> availableColors = new HashSet<>(Arrays.asList(TeamColor.values()));
         availableColors.remove(TeamColor.RANDOM);
 
-        teams.stream().map(T::getColorOrWhite).forEach(availableColors::remove);
+        teams.stream().map(ZTeam::getColorOrWhite).forEach(availableColors::remove);
 
         if (availableColors.size() != 0)
         {
@@ -382,26 +392,26 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
 
     /* *** ZTeams creation methods *** */
 
-
     /**
-     * @return The internal teams creator.
+     * Creates a team with name, color and member(s), registers and returns it.
+     *
+     * @param name The team's name.
+     * @param color The team's color.
+     * @param players Initial team members.
+     * @return The (already registered) team.
      */
-    public ZTeamCreator<T> teamsCreator()
+    public ZTeam createTeam(final String name, final TeamColor color, final OfflinePlayer... players)
     {
-        return teamsCreator;
-    }
+        final ZTeam team = new ZTeam(name, color);
 
-    /**
-     * Sets the teams creator used by the provided GUIs and commands to create teams.
-     *
-     * Override this if you want to provide your own subclassed team class with your custom
-     * attributes.
-     *
-     * @param teamsCreator The teams creator to use.
-     */
-    public static void setTeamsCreator(ZTeamCreator<? extends ZTeam> teamsCreator)
-    {
-        get().teamsCreator = teamsCreator;
+        for (OfflinePlayer player : players)
+        {
+            team.addPlayer(player);
+        }
+
+        registerTeam(team);
+
+        return team;
     }
 
 
@@ -431,6 +441,9 @@ public class ZTeams<T extends ZTeam> extends ZLibComponent implements Listener
 
     public void updateGUIs()
     {
-        // TODO
+        Gui.update(TeamsSelectorGUI.class);
+        Gui.update(TeamBuilderBaseGUI.class);
+        Gui.update(TeamActionGUI.class);
+        Gui.update(TeamEditMembersGUI.class);
     }
 }

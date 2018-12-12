@@ -41,22 +41,12 @@ import fr.zcraft.zteams.colors.TeamColor;
 import fr.zcraft.zteams.guis.TeamsSelectorGUI;
 import fr.zcraft.zteams.guis.utils.OfflinePlayersComparator;
 import fr.zcraft.zteams.texts.TextUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.SkullType;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.UUID;
+import java.util.*;
 
 
 public class TeamBuilderStepPlayersGUI extends TeamBuilderBaseGUI
@@ -67,7 +57,7 @@ public class TeamBuilderStepPlayersGUI extends TeamBuilderBaseGUI
     private final Set<UUID> teamMembers = new HashSet<>();
 
 
-    public TeamBuilderStepPlayersGUI(TeamColor color, String name)
+    public TeamBuilderStepPlayersGUI(final TeamColor color, final String name)
     {
         this.color = color;
         this.name = name;
@@ -169,14 +159,12 @@ public class TeamBuilderStepPlayersGUI extends TeamBuilderBaseGUI
     @GuiAction ("done")
     protected void done()
     {
-        final ZTeam team = ZTeams.get().teamsCreator().createTeam(getName(), getColor());
-
         try
         {
-            ZTeams.get().registerTeam(team);
-            getPlayer().sendMessage(I.t("{cs}Team created."));
-
+            final ZTeam team = ZTeams.get().createTeam(getName(), getColor());
             teamMembers.stream().map(Bukkit::getOfflinePlayer).filter(Objects::nonNull).forEach(team::addPlayer);
+
+            getPlayer().sendMessage(I.t("{cs}Team created."));
         }
         catch (IllegalArgumentException e)
         {

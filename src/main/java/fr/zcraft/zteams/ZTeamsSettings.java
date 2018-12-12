@@ -42,6 +42,7 @@ public class ZTeamsSettings
 
     private boolean bannerShapeWriteLetter = true;
     private boolean bannerShapeAddBorder = false;
+    private boolean bannerAllowSpecialShapes = true;
 
     private boolean teamsOptionsSeeFriendlyInvisibles = true;
     private boolean teamsOptionsFriendlyFire = true;
@@ -52,6 +53,8 @@ public class ZTeamsSettings
     private boolean teamsGUIGlowOnCurrentTeam = true;
 
     private int maxPlayersPerTeam = 0;
+
+    private boolean teamChatLogInConsole = false;
 
 
 
@@ -81,6 +84,14 @@ public class ZTeamsSettings
     public boolean bannerShapeAddBorder()
     {
         return bannerShapeAddBorder;
+    }
+
+    /**
+     * @return {@code true} if “easter-egg” default banners with special shapes based on names are allowed.
+     */
+    public boolean bannerAllowSpecialShapes()
+    {
+        return bannerAllowSpecialShapes;
     }
 
     /**
@@ -140,6 +151,14 @@ public class ZTeamsSettings
         return maxPlayersPerTeam;
     }
 
+    /**
+     * @return {@code true} if the teams' private chat should be logged into the console.
+     */
+    public boolean teamChatLogInConsole()
+    {
+        return teamChatLogInConsole;
+    }
+
 
 
     /* *** Setters *** */
@@ -153,9 +172,10 @@ public class ZTeamsSettings
      *
      * @param scoreboard The scoreboard to use.
      */
-    public void setScoreboard(final Scoreboard scoreboard)
+    public ZTeamsSettings setScoreboard(final Scoreboard scoreboard)
     {
         this.scoreboard = scoreboard;
+        return this;
     }
 
     /**
@@ -167,12 +187,31 @@ public class ZTeamsSettings
      *                               should be written on the default team banners. Default {@code true}.
      * @param bannerShapeAddBorder {@code true} if a border should be added to the default team banners. Default {@code false}.
      */
-    public void setBannerOptions(final boolean bannerShapeWriteLetter, final boolean bannerShapeAddBorder)
+    public ZTeamsSettings setBannerOptions(final boolean bannerShapeWriteLetter, final boolean bannerShapeAddBorder)
+    {
+        return setBannerOptions(bannerShapeWriteLetter, bannerShapeAddBorder, true);
+    }
+
+    /**
+     * Updates the settings followed to generate the default teams banners.
+     *
+     * All default banners will be regenerated when this method is called, according to the new settings.
+     *  @param bannerShapeWriteLetter {@code true} if the first meaningful letter of the team name
+     *                                should be written on the default team banners. Default {@code true}.
+     * @param bannerShapeAddBorder {@code true} if a border should be added to the default team banners.
+     *                             Default {@code false}.
+     * @param bannerAllowSpecialShapes {@code true} if “easter-egg” default banners with special shapes
+     *                                 based on names are allowed. Default {@code true}.
+     */
+    public ZTeamsSettings setBannerOptions(final boolean bannerShapeWriteLetter, final boolean bannerShapeAddBorder, boolean bannerAllowSpecialShapes)
     {
         this.bannerShapeWriteLetter = bannerShapeWriteLetter;
         this.bannerShapeAddBorder = bannerShapeAddBorder;
+        this.bannerAllowSpecialShapes = bannerAllowSpecialShapes;
 
         ZTeams.get().updateDefaultBanners();
+
+        return this;
     }
 
     /**
@@ -186,7 +225,7 @@ public class ZTeamsSettings
      *                                 name including their team color). Default {@code true}.
      * @param teamsOptionsAllowDuplicatedNames {@code true} to allow multiple teams with the same name to be registered. Default {@code false}.
      */
-    public void setTeamsOptions(
+    public ZTeamsSettings setTeamsOptions(
             final boolean teamsOptionsSeeFriendlyInvisibles,
             final boolean teamsOptionsFriendlyFire,
             final boolean teamsOptionsColorizeChat,
@@ -198,6 +237,15 @@ public class ZTeamsSettings
         this.teamsOptionsAllowDuplicatedNames = teamsOptionsAllowDuplicatedNames;
 
         ZTeams.get().updateTeamsOptions();
+
+        return this;
+    }
+
+    public ZTeamsSettings setTeamsChatOptions(final boolean teamChatLogInConsole)
+    {
+        this.teamChatLogInConsole = teamChatLogInConsole;
+
+        return this;
     }
 
     /**
@@ -208,22 +256,28 @@ public class ZTeamsSettings
      * @param teamsGUIItemType The item to use to represent teams on the GUIs. Default {@link TeamsGUIItemType#BANNER BANNER}.
      * @param teamsGUIGlowOnCurrentTeam {@code true} to add glow on the player's current team. Default {@code true}.
      */
-    public void setGUIOptions(final TeamsGUIItemType teamsGUIItemType, final boolean teamsGUIGlowOnCurrentTeam)
+    public ZTeamsSettings setGUIOptions(final TeamsGUIItemType teamsGUIItemType, final boolean teamsGUIGlowOnCurrentTeam)
     {
         this.teamsGUIItemType = teamsGUIItemType != null ? teamsGUIItemType : TeamsGUIItemType.BANNER;
         this.teamsGUIGlowOnCurrentTeam = teamsGUIGlowOnCurrentTeam;
 
         ZTeams.get().updateGUIs();
+
+        return this;
     }
 
     /**
-     * Updates the maximal amount of players per team. If some teams overflow the new limits, players will not be kicked
+     * Updates the maximal amount of players per team. If some teams overflow the new limit, players will not be kicked
      * but new one will not be able to join.
      *
      * @param maxPlayersPerTeam The maximal number of players per team. {@code 0} to remove the limit (default value).
      */
-    public void setMaxPlayersPerTeam(final int maxPlayersPerTeam)
+    public ZTeamsSettings setMaxPlayersPerTeam(final int maxPlayersPerTeam)
     {
         this.maxPlayersPerTeam = maxPlayersPerTeam;
+
+        ZTeams.get().updateGUIs();
+
+        return this;
     }
 }

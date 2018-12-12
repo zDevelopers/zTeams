@@ -55,14 +55,18 @@ public enum ZTeamsPermission
     UPDATE_OTHER_TEAM_COLOR("Allows an user to update another team color", true),
     UPDATE_OTHER_TEAM_BANNER("Allows an user to update another team banner", true),
 
-    SPY_TEAM_CHAT("Allows an user to see the private team chat of another team", true)
+    ENTER_PRIVATE_CHAT("Allows an user to enter its team's private chat", false),
+    SPY_TEAM_CHAT("Allows an user to enter the private team chat of another team", true),
+    TALK_IN_OTHER_TEAM_CHAT("Allows an user to talk inside the private team chat of another team", true),
+    SPY_ALL_TEAMS("Allows an user to see the private team chat of all other teams", true),
+    MAKE_ANOTHER_SPY_ALL_TEAMS("Allows an user to enable spy mode for another player", true)
     ;
 
 
     private final String description;
     private final boolean administrative;
 
-    private ZTeamsPermission(final String description, final boolean administrative)
+    ZTeamsPermission(final String description, final boolean administrative)
     {
         this.description = description;
         this.administrative = administrative;

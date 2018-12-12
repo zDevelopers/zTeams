@@ -34,44 +34,23 @@
 package fr.zcraft.zteams;
 
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
-import fr.zcraft.zlib.tools.items.TextualBanners;
 import fr.zcraft.zteams.colors.ColorsUtils;
 import fr.zcraft.zteams.colors.TeamColor;
-import fr.zcraft.zteams.creator.ZTeamCreator;
-import fr.zcraft.zteams.events.PlayerJoinedTeamEvent;
-import fr.zcraft.zteams.events.PlayerLeftTeamEvent;
-import fr.zcraft.zteams.events.PlayerPreJoinTeamEvent;
-import fr.zcraft.zteams.events.PlayerPreLeaveTeamEvent;
-import fr.zcraft.zteams.events.TeamUpdatedEvent;
-import fr.zcraft.zteams.texts.TextUtils;
+import fr.zcraft.zteams.events.*;
 import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.scoreboard.Team;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
 /**
  * Represents a team.
- *
- * If you need to add your own teams attribute, subclass this class,
- * instantiate a custom parametrized {@link ZTeams<YourTeamClass>} instance,
- * and provide a custom {@link ZTeamCreator} to create new teams instances.
  */
 public class ZTeam
 {
@@ -160,7 +139,7 @@ public class ZTeam
      */
     public ItemStack getBanner()
     {
-        return banner == null ? defaultBanner : banner;
+        return banner == null ? defaultBanner.clone() : banner.clone();
     }
 
     /**
@@ -374,6 +353,8 @@ public class ZTeam
     /**
      * Adds a player inside this team.
      *
+     * Fires an event. If it is cancelled, the player is not added.
+     *
      * @param player The player to add.
      */
     public void addPlayer(final OfflinePlayer player)
@@ -406,6 +387,7 @@ public class ZTeam
      * Removes a player from this team.
      *
      * Nothing is done if the player wasn't in this team.
+     * Fires an event. If it is cancelled, the player is not removed.
      *
      * @param player The player to remove.
      */
@@ -418,6 +400,7 @@ public class ZTeam
      * Removes a player from this team.
      *
      * Nothing is done if the player wasn't in this team.
+     * Fires an event. If it is cancelled, the player is not removed.
      *
      * @param playerID The player to remove.
      */
@@ -430,14 +413,17 @@ public class ZTeam
      * Removes a player from this team.
      *
      * Nothing is done if the player wasn't in this team.
+     * Fires an event. If it is cancelled, the player is not removed.
      *
      * @param player The player to remove.
      * @param becauseJoin {@code true} if the player is removed to go into another team.
      */
-    void removePlayer(final OfflinePlayer player, boolean becauseJoin)
+    private void removePlayer(final OfflinePlayer player, boolean becauseJoin)
     {
         Validate.notNull(internalTeam, "This team was deleted");
         Validate.notNull(player, "The player cannot be null.");
+
+        if (!containsPlayer(player.getUniqueId())) return;
 
         if (!becauseJoin)
         {
@@ -583,30 +569,14 @@ public class ZTeam
             return;
         }
 
-        final DyeColor dye = ColorsUtils.chat2Dye(getColorOrWhite().toChatColor());
-
-        if (ZTeams.settings().bannerShapeWriteLetter())
-        {
-            defaultBanner = TextualBanners.getCharBanner(
-                Character.toUpperCase(TextUtils.getInitialLetter(name)),
-                dye,
-                ZTeams.settings().bannerShapeAddBorder()
-            );
-        }
-        else
-        {
-            defaultBanner = new ItemStack(Material.BANNER);
-            BannerMeta meta = (BannerMeta) defaultBanner.getItemMeta();
-            meta.setBaseColor(dye);
-            defaultBanner.setItemMeta(meta);
-        }
+        defaultBanner = ZTeamsBanners.getDefaultBanner(name, ColorsUtils.chat2Dye(getColorOrWhite().toChatColor()));
     }
 
 
     @Override
     public int hashCode()
     {
-        return ((name == null) ? 0 : name.hashCode());
+        return ((internalName == null) ? 0 : internalName.hashCode());
     }
 
     @Override

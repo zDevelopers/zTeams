@@ -31,11 +31,7 @@
  */
 package fr.zcraft.zteams.guis;
 
-import fr.zcraft.zlib.components.gui.ExplorerGui;
-import fr.zcraft.zlib.components.gui.Gui;
-import fr.zcraft.zlib.components.gui.GuiAction;
-import fr.zcraft.zlib.components.gui.GuiUtils;
-import fr.zcraft.zlib.components.gui.PromptGui;
+import fr.zcraft.zlib.components.gui.*;
 import fr.zcraft.zlib.components.i18n.I;
 import fr.zcraft.zlib.tools.items.ItemStackBuilder;
 import fr.zcraft.zteams.ZTeam;
@@ -57,6 +53,8 @@ public class TeamsSelectorGUI extends ExplorerGui<ZTeam>
     @Override
     protected void onUpdate()
     {
+        //final ZTeam[] teams = ZTeams.get().getTeams().toArray(new ZTeam[] {});
+
         /// The title of the teams selector GUI. {0} = teams count.
         setTitle(I.t("{black}Select a team {reset}({0})", ZTeams.get().countTeams()));
         setData(ZTeams.get().getTeamsArray());
@@ -78,7 +76,7 @@ public class TeamsSelectorGUI extends ExplorerGui<ZTeam>
 
         if (ZTeamsPermission.CREATE_TEAM.grantedTo(getPlayer()))
         {
-            int newTeamSlot = getPlayer().hasPermission("uh.player.renameTeam") ? getSize() - 4 : getSize() - 5;
+            int newTeamSlot = ZTeamsPermission.UPDATE_TEAM_NAME.grantedTo(getPlayer()) ? getSize() - 4 : getSize() - 5;
 
             /// The title of a button to create a new team, in the selector GUI.
             action("new", newTeamSlot, GuiUtils.makeItem(Material.EMERALD, I.t("{white}New team")));
@@ -181,7 +179,7 @@ public class TeamsSelectorGUI extends ExplorerGui<ZTeam>
     {
         return new ItemStackBuilder(Material.BARRIER)
                 .title(I.t("{red}No team created"))
-                .lore(getPlayer().hasPermission("uh.team")
+                .lore(ZTeamsPermission.CREATE_TEAM.grantedTo(getPlayer())
                         /// Subtitle of the item displayed in the teams selector GUI if there isn't anything to display.
                         ? GuiUtils.generateLore(I.t("{gray}Click the emerald button below to create one."))
                         /// Subtitle of the item displayed in the teams selector GUI if there isn't anything to display and the player cannot create a team.

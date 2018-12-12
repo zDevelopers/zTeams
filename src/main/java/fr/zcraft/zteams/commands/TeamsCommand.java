@@ -49,13 +49,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -173,7 +170,7 @@ public class TeamsCommand extends Command
             } while (ZTeams.get().isTeamRegistered(name));
         }
 
-        final ZTeam team = ZTeams.get().teamsCreator().createTeam(name, color);
+        final ZTeam team = ZTeams.get().createTeam(name, color);
 
         try
         {
@@ -352,7 +349,39 @@ public class TeamsCommand extends Command
 
     protected void spy() throws CommandException
     {
-        // TODO spies
+        final Player target;
+
+        if (sargs.length == 0)
+        {
+            if (!ZTeamsPermission.SPY_ALL_TEAMS.grantedTo(playerSender()))
+                throwNotAuthorized();
+
+            target = playerSender();
+        }
+        else
+        {
+            if (!ZTeamsPermission.MAKE_ANOTHER_SPY_ALL_TEAMS.grantedTo(sender))
+                throwNotAuthorized();
+
+            target = getPlayerParameter(0);
+        }
+
+        final String message;
+
+        if (ZTeams.chatManager().isGlobalSpy(target.getUniqueId()))
+        {
+            ZTeams.chatManager().removeGlobalSpy(target.getUniqueId());
+            message = I.t("{cs}Spy mode {darkred}disabled{cs} for {0}.", target.getDisplayName() + ChatColor.GREEN);
+        }
+        else
+        {
+            ZTeams.chatManager().addGlobalSpy(target.getUniqueId());
+            message = I.t("{cs}Spy mode {darkgreen}enabled{cs} for {0}.", target.getDisplayName() + ChatColor.GREEN);
+        }
+
+        target.sendMessage(message);
+
+        if (!sender.equals(target)) success(message);
     }
 
     /**
@@ -460,7 +489,7 @@ public class TeamsCommand extends Command
                 return null;
 
             case "spy":
-                if (sargs.length == 1 && ZTeamsPermission.SPY_TEAM_CHAT.grantedTo(sender)) return getMatchingTeams(sargs[0]);
+                if (sargs.length == 1 && ZTeamsPermission.MAKE_ANOTHER_SPY_ALL_TEAMS.grantedTo(sender)) return getMatchingPlayerNames(sargs[0]);
                 else return null;
 
             default:

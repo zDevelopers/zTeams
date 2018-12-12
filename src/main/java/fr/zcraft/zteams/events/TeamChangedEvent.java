@@ -34,6 +34,7 @@
 package fr.zcraft.zteams.events;
 
 import fr.zcraft.zteams.ZTeam;
+import org.bukkit.event.HandlerList;
 
 
 /**
@@ -41,8 +42,20 @@ import fr.zcraft.zteams.ZTeam;
  */
 public abstract class TeamChangedEvent extends ZTeamsEvent
 {
-    public TeamChangedEvent(ZTeam team)
+    private static final HandlerList handlers = new HandlerList();
+
+    public TeamChangedEvent(final ZTeam team)
     {
         super(team);
+    }
+
+    public HandlerList getHandlers()
+    {
+        return handlers;
+    }
+
+    public static HandlerList getHandlerList()
+    {
+        return handlers;
     }
 }

@@ -45,13 +45,6 @@ public class OfflinePlayersComparator implements Comparator<OfflinePlayer>
         {
             return player1.getName().toLowerCase().compareTo(player2.getName().toLowerCase());
         }
-        else if (player1.isOnline())
-        {
-            return -1;
-        }
-        else
-        {
-            return 1;
-        }
+        else return player1.isOnline() ? -1 : 1;
     }
 }

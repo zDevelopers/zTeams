@@ -31,39 +31,25 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
-package fr.zcraft.zteams.events;
+package fr.zcraft.zteams.commands;
 
-import fr.zcraft.zteams.ZTeam;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
+import fr.zcraft.zlib.components.commands.Command;
+import fr.zcraft.zlib.components.commands.CommandException;
+import fr.zcraft.zlib.components.commands.CommandInfo;
+import fr.zcraft.zlib.components.i18n.I;
+import fr.zcraft.zteams.ZTeams;
 
-
-/**
- * Base class for all zTeams events.
- */
-public abstract class ZTeamsEvent extends Event
+@CommandInfo (name = "global-chat", usageParameters = "<message>", aliases = "g")
+public class GlobalChatCommand extends Command
 {
-    private static final HandlerList handlers = new HandlerList();
-
-    final protected ZTeam team;
-
-    public ZTeamsEvent(final ZTeam team)
+    @Override
+    protected void run() throws CommandException
     {
-        this.team = team;
-    }
+        if (args.length == 0)
+        {
+            throwInvalidArgument(I.t("Nothing to send to everyone."));
+        }
 
-    public ZTeam getTeam()
-    {
-        return team;
-    }
-
-    public HandlerList getHandlers()
-    {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList()
-    {
-        return handlers;
+        ZTeams.chatManager().sendGlobalMessage(playerSender(), String.join(" ", args));
     }
 }
