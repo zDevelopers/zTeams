@@ -53,18 +53,23 @@ public class TeamsSelectorGUI extends ExplorerGui<ZTeam>
     @Override
     protected void onUpdate()
     {
-        //final ZTeam[] teams = ZTeams.get().getTeams().toArray(new ZTeam[] {});
-
-        /// The title of the teams selector GUI. {0} = teams count.
-        setTitle(I.t("{black}Select a team {reset}({0})", ZTeams.get().countTeams()));
-        setData(ZTeams.get().getTeamsArray());
+        if (ZTeamsPermission.LIST_TEAMS.grantedTo(getPlayer()))
+        {
+            /// The title of the teams selector GUI. {0} = teams count.
+            setTitle(I.t("{black}Select a team {reset}({0})", ZTeams.get().countTeams()));
+            setData(ZTeams.get().getTeamsArray());
+        }
+        else
+        {
+            setTitle(I.t("{darkred}Unauthorized to list teams"));
+        }
 
         setMode(Mode.READONLY);
         setKeepHorizontalScrollingSpace(true);
 
         if (ZTeamsPermission.UPDATE_TEAM_NAME.grantedTo(getPlayer()))
         {
-            int renameSlot = getPlayer().hasPermission("uh.team") ? getSize() - 6 : getSize() - 5;
+            int renameSlot = ZTeamsPermission.CREATE_TEAM.grantedTo(getPlayer()) ? getSize() - 6 : getSize() - 5;
 
             action("rename", renameSlot, GuiUtils.makeItem(
                     /// The title of a button to rename our team, in the selector GUI.
@@ -81,6 +86,18 @@ public class TeamsSelectorGUI extends ExplorerGui<ZTeam>
             /// The title of a button to create a new team, in the selector GUI.
             action("new", newTeamSlot, GuiUtils.makeItem(Material.EMERALD, I.t("{white}New team")));
         }
+
+        if (!ZTeamsPermission.LIST_TEAMS.grantedTo(getPlayer()) && hasManagementPermission())
+        {
+            final ZTeam team = ZTeams.get().getTeamForPlayer(getPlayer());
+            if (team != null)
+            {
+                // Yes, that's the same slot as the rename button. As we can rename from
+                // the details GUI, the GUI is cleaner this way.
+                int ownTeamSlot = ZTeamsPermission.CREATE_TEAM.grantedTo(getPlayer()) ? getSize() - 6 : getSize() - 5;
+                action("own_team", ownTeamSlot, getViewItem(team));
+            }
+        }
     }
 
     @Override
@@ -94,7 +111,7 @@ public class TeamsSelectorGUI extends ExplorerGui<ZTeam>
 
         lore.add("");
 
-        if (team.getSize() != 0)
+        if (team.size() != 0)
         {
             /// The "Players" title in the selector GUI, on a team's tooltip
             lore.add(I.t("{blue}Players"));
@@ -162,9 +179,9 @@ public class TeamsSelectorGUI extends ExplorerGui<ZTeam>
         // Title
         final String title = ZTeams.settings().maxPlayersPerTeam() != 0
                 /// Title of the team item in the teams selector GUI (with max). {0}: team display name. {1}: players count. {2}: max count.
-                ? I.t("{white}Team {0} {gray}({1}/{2})", team.getDisplayName(), team.getSize(), ZTeams.settings().maxPlayersPerTeam())
+                ? I.t("{white}Team {0} {gray}({1}/{2})", team.getDisplayName(), team.size(), ZTeams.settings().maxPlayersPerTeam())
                 /// Title of the team item in the teams selector GUI (without max) {0}: team display name. {1}: players count.
-                : I.tn("{white}Team {0} {gray}({1} player)", "{white}Team {0} {gray}({1} players)", team.getSize(), team.getDisplayName(), team.getSize());
+                : I.tn("{white}Team {0} {gray}({1} player)", "{white}Team {0} {gray}({1} players)", team.size(), team.getDisplayName(), team.size());
 
         return new ItemStackBuilder(item)
                 .title(title)
@@ -177,15 +194,30 @@ public class TeamsSelectorGUI extends ExplorerGui<ZTeam>
     @Override
     protected ItemStack getEmptyViewItem()
     {
-        return new ItemStackBuilder(Material.BARRIER)
-                .title(I.t("{red}No team created"))
-                .lore(ZTeamsPermission.CREATE_TEAM.grantedTo(getPlayer())
-                        /// Subtitle of the item displayed in the teams selector GUI if there isn't anything to display.
-                        ? GuiUtils.generateLore(I.t("{gray}Click the emerald button below to create one."))
-                        /// Subtitle of the item displayed in the teams selector GUI if there isn't anything to display and the player cannot create a team.
-                        : GuiUtils.generateLore(I.t("{gray}Wait for an administrator to create one.")))
-                .hideAttributes()
-                .item();
+        if (ZTeamsPermission.LIST_TEAMS.grantedTo(getPlayer()))
+        {
+            return new ItemStackBuilder(Material.BARRIER)
+                    .title(I.t("{red}No team created"))
+                    .longLore(ZTeamsPermission.CREATE_TEAM.grantedTo(getPlayer())
+                            /// Subtitle of the item displayed in the teams selector GUI if there isn't anything to display.
+                            ? I.t("{gray}Click the emerald button below to create one.")
+                            /// Subtitle of the item displayed in the teams selector GUI if there isn't anything to display and the player cannot create a team.
+                            : I.t("{gray}Wait for an administrator to create one."))
+                    .hideAttributes()
+                    .item();
+        }
+        else
+        {
+            return new ItemStackBuilder(Material.BARRIER)
+                    .title(I.t("{red}You are not allowed to list the teams."))
+                    .longLore(ZTeams.get().getTeamForPlayer(getPlayer()) != null && hasManagementPermission()
+                            /// Subtitle of the item displayed in the teams selector GUI if teams are not listable by the player, but it is into a team.
+                            ? I.t("{gray}You can still click the item below to open your team's settings.")
+                            /// Subtitle of the item displayed in the teams selector GUI if teams are not listable by the player, and it is not into a team.
+                            : I.t("{gray}Sorry."))
+                    .hideAttributes()
+                    .item();
+        }
     }
 
     @Override
@@ -236,6 +268,15 @@ public class TeamsSelectorGUI extends ExplorerGui<ZTeam>
     public void newTeam()
     {
         Gui.open(getPlayer(), new TeamBuilderStepColorGUI());
+    }
+
+    @GuiAction ("own_team")
+    public void ownTeam()
+    {
+        final ZTeam team = ZTeams.get().getTeamForPlayer(getPlayer());
+        if (team == null) return;
+
+        Gui.open(getPlayer(), new TeamEditGUI(team), this);
     }
 
     private boolean hasManagementPermission()

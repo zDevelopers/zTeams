@@ -42,6 +42,8 @@ public enum ZTeamsPermission
     DELETE_TEAM("Allows an user to delete a team", true),
     RESET_TEAMS("Allows an user to delete all teams", true),
 
+    LIST_TEAMS("Allows an user to list the teams", false),
+
     JOIN_TEAM("Allows an user to join a team", false),
     LEAVE_TEAM("Allows an user to leave a team", false),
 

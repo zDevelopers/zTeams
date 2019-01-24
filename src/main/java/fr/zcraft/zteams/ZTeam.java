@@ -47,12 +47,13 @@ import org.bukkit.scoreboard.Team;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
  * Represents a team.
  */
-public class ZTeam
+public class ZTeam implements Collection<UUID>
 {
     private static final Random random = new Random();
 
@@ -74,7 +75,7 @@ public class ZTeam
 
         // We use a random internal name because the name of a team, in Minecraft vanilla, is limited
         // (16 characters max).
-        this.internalName = String.valueOf(random.nextInt(99999999)) + String.valueOf(random.nextInt(99999999));
+        this.internalName = random.nextInt(99999999) + String.valueOf(random.nextInt(99999999));
         this.internalTeam = ZTeams.settings().scoreboard().registerNewTeam(this.internalName);
 
         setName(name);
@@ -160,7 +161,7 @@ public class ZTeam
      */
     public Set<OfflinePlayer> getPlayers()
     {
-        return players.stream()
+        return stream()
                 .map(uuid -> Bukkit.getServer().getOfflinePlayer(uuid))
                 .collect(Collectors.toSet());
     }
@@ -183,7 +184,7 @@ public class ZTeam
      */
     public Set<Player> getOnlinePlayers()
     {
-        return players.stream()
+        return stream()
                 .map(uuid -> Bukkit.getServer().getPlayer(uuid))
                 .filter(Objects::nonNull)
                 .filter(Player::isOnline)
@@ -197,7 +198,7 @@ public class ZTeam
      */
     public Set<UUID> getOnlinePlayersUUID()
     {
-        return players.stream()
+        return stream()
                 .map(uuid -> Bukkit.getServer().getPlayer(uuid))
                 .filter(Objects::nonNull)
                 .filter(Player::isOnline)
@@ -209,8 +210,22 @@ public class ZTeam
      * Returns the size of this team.
      *
      * @return The size.
+     * @deprecated Use {@link #size()}
+     * @see #size()
      */
+    @Deprecated
     public int getSize()
+    {
+        return players.size();
+    }
+
+    /**
+     * Returns the number of players in this team.
+     *
+     * @return The number of players.
+     */
+    @Override
+    public int size()
     {
         return players.size();
     }
@@ -220,9 +235,10 @@ public class ZTeam
      *
      * @return The emptiness.
      */
+    @Override
     public boolean isEmpty()
     {
-        return getSize() == 0;
+        return players.isEmpty();
     }
 
     /**
@@ -232,7 +248,120 @@ public class ZTeam
      */
     public boolean isFull()
     {
-        return ZTeams.settings().maxPlayersPerTeam() != 0 && getSize() >= ZTeams.settings().maxPlayersPerTeam();
+        return ZTeams.settings().maxPlayersPerTeam() != 0 && size() >= ZTeams.settings().maxPlayersPerTeam();
+    }
+
+    @Override
+    public boolean contains(Object o)
+    {
+        return players.contains(o);
+    }
+
+    @Override
+    public Iterator<UUID> iterator()
+    {
+        return players.iterator();
+    }
+
+    @Override
+    public Stream<UUID> stream()
+    {
+        return players.stream();
+    }
+
+    @Override
+    public Object[] toArray()
+    {
+        return players.toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] ts)
+    {
+        return players.toArray(ts);
+    }
+
+    @Override
+    public boolean add(UUID uuid)
+    {
+        final OfflinePlayer player;
+
+        if (!containsPlayer(uuid) && (player = Bukkit.getOfflinePlayer(uuid)) != null)
+        {
+            addPlayer(player);
+            return true;
+        }
+
+        else return false;
+    }
+
+    @Override
+    public boolean remove(Object o)
+    {
+        if (!(o instanceof OfflinePlayer) && !(o instanceof UUID))
+            return false;
+
+        final UUID id;
+        if (o instanceof OfflinePlayer)
+        {
+            id = ((OfflinePlayer) o).getUniqueId();
+        }
+        else
+        {
+            id = (UUID) o;
+        }
+
+        if (containsPlayer(id))
+        {
+            removePlayer(id);
+            return true;
+        }
+
+        else return false;
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> collection)
+    {
+        return collection.stream().allMatch(this::contains);
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends UUID> collection)
+    {
+        boolean somethingAdded = false;
+
+        for (final UUID uuid : collection)
+        {
+            if (add(uuid)) somethingAdded = true;
+        }
+
+        return somethingAdded;
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> collection)
+    {
+        boolean somethingRemoved = false;
+
+        for (final Object o : collection)
+        {
+            if (remove(o)) somethingRemoved = true;
+        }
+
+        return somethingRemoved;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> collection)
+    {
+        return stream().filter(uuid -> !collection.contains(uuid)).map(this::remove).anyMatch(removed -> removed);
+    }
+
+    @Override
+    public void clear()
+    {
+        forEach(this::remove);
     }
 
 
@@ -308,15 +437,29 @@ public class ZTeam
         this.banner = new ItemStackBuilder(banner.clone())
                 .title(displayName)
                 .amount(1)
+                .data(banner.getData().getData())
                 .hideAttributes()
                 .item();
 
-        if (banner.hasItemMeta())
+        final BannerMeta meta = (BannerMeta) banner.getItemMeta();
+
+        // Sometimes the base color can be null, preventing to use custom banners.
+        // We extract the base color from the banner's data value.
+        // FIXME Magic Values
+        // FIXME This is likely to break with Minecraft 1.13.
+        // FIXME The item meta does not keep the base color after being set in the ItemStack (??),
+        //  preventing to use the banner after (and breaking banner on shields too).
+        //  Maybe direct NBT manipulation could be the answer?
+
+        DyeColor baseColor = meta.getBaseColor();
+        if (baseColor == null)
         {
-            BannerMeta meta = (BannerMeta) this.banner.getItemMeta();
-            meta.setBaseColor(((BannerMeta) banner.getItemMeta()).getBaseColor());
-            this.banner.setItemMeta(meta);
+            baseColor = DyeColor.getByDyeData(banner.getData().getData());
         }
+
+        meta.setBaseColor(baseColor);
+
+        this.banner.setItemMeta(meta);
 
         ZTeams.fireEvent(new TeamUpdatedEvent(this));
     }
@@ -362,7 +505,7 @@ public class ZTeam
         Validate.notNull(internalTeam, "This team was deleted");
         Validate.notNull(player, "The player cannot be null.");
 
-        if (ZTeams.settings().maxPlayersPerTeam() != 0 && this.players.size() >= ZTeams.settings().maxPlayersPerTeam())
+        if (ZTeams.settings().maxPlayersPerTeam() != 0 && size() >= ZTeams.settings().maxPlayersPerTeam())
         {
             throw new RuntimeException("The team " + name + " is full");
         }
@@ -479,7 +622,7 @@ public class ZTeam
      */
     public boolean containsPlayer(final Player player)
     {
-        Validate.notNull(player, "The player cannot be null.");
+        if (player == null) return false;
 
         return players.contains(player.getUniqueId());
     }
@@ -492,7 +635,7 @@ public class ZTeam
      */
     public boolean containsPlayer(final UUID playerID)
     {
-        Validate.notNull(playerID, "The player cannot be null.");
+        if (playerID == null) return false;
 
         return players.contains(playerID);
     }
@@ -590,6 +733,6 @@ public class ZTeam
             return false;
 
         final ZTeam other = (ZTeam) obj;
-        return name == null ? other.name == null : name.equals(other.name);
+        return Objects.equals(internalName, other.internalName);
     }
 }

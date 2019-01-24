@@ -243,6 +243,9 @@ public class TeamsCommand extends Command
 
     protected void list() throws CommandException
     {
+        if (!ZTeamsPermission.LIST_TEAMS.grantedTo(sender))
+            throwNotAuthorized();
+
         final Set<ZTeam> teams = ZTeams.get().getTeams();
 
         if (teams.size() == 0)
@@ -252,7 +255,7 @@ public class TeamsCommand extends Command
 
         for (final ZTeam team : teams)
         {
-            info(I.tn("{0} ({1} player)", "{0} ({1} players)", team.getSize(), team.getDisplayName(), team.getSize()));
+            info(I.tn("{0} ({1} player)", "{0} ({1} players)", team.size(), team.getDisplayName(), team.size()));
 
             for (final OfflinePlayer player : team.getPlayers())
             {
@@ -499,8 +502,8 @@ public class TeamsCommand extends Command
                 if (ZTeamsPermission.DELETE_TEAM.grantedTo(sender)) allowedCommands.add("remove");
                 if (ZTeamsPermission.JOIN_TEAM.grantedTo(sender)) allowedCommands.add("join");
                 if (ZTeamsPermission.LEAVE_TEAM.grantedTo(sender)) allowedCommands.add("leave");
+                if (ZTeamsPermission.LIST_TEAMS.grantedTo(sender)) allowedCommands.add("list");
 
-                allowedCommands.add("list");
                 allowedCommands.add("gui");
 
                 if (ZTeamsPermission.UPDATE_TEAM_BANNER.grantedTo(sender) || ZTeamsPermission.UPDATE_OTHER_TEAM_BANNER.grantedTo(sender))
@@ -519,6 +522,9 @@ public class TeamsCommand extends Command
 
     private List<String> getMatchingTeams(final String prefix)
     {
+        // Avoids leaks through auto-completion.
+        if (!ZTeamsPermission.LIST_TEAMS.grantedTo(sender)) return null;
+
         final String lowerPrefix = prefix.toLowerCase();
         final List<String> suggestions = new ArrayList<>();
 

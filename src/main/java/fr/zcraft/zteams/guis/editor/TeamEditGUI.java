@@ -82,7 +82,7 @@ public class TeamEditGUI extends TeamActionGUI
         final ItemStackBuilder bannerButton = new ItemStackBuilder(team.getBanner())
                 .title(team.getDisplayName())
                 /// Members count in the banner description, in the team edit GUI.
-                .longLore(I.tn("{white}{0} {gray}member", "{white}{0} {gray}members", team.getSize(), team.getSize()))
+                .longLore(I.tn("{white}{0} {gray}member", "{white}{0} {gray}members", team.size()))
                 .lore(" ").hideAttributes();
 
         if (ZTeamsPermission.UPDATE_TEAM_BANNER.grantedTo(getPlayer()))
