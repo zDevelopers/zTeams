@@ -4,14 +4,14 @@
 'UTF-8'
 -protected
 -sourcepath
-'/home/runner/work/zTeams/zTeams/src/main/java'
+'/home/runner/work/QuartzTeams/QuartzTeams/src/main/java'
 -author
 -bottom
 'Copyright &#169; 2020. All rights reserved.'
 -charset
 'UTF-8'
 -d
-'/home/runner/work/zTeams/zTeams/target/site/apidocs'
+'/home/runner/work/QuartzTeams/QuartzTeams/target/site/apidocs'
 -docencoding
 'UTF-8'
 -doctitle
@@ -19,7 +19,7 @@
 -link
 'https://hub.spigotmc.org/javadocs/bukkit'
 -linkoffline
-'http://docs.oracle.com/javase/8/docs/api' '/home/runner/work/zTeams/zTeams/target/javadoc-bundle-options'
+'http://docs.oracle.com/javase/8/docs/api' '/home/runner/work/QuartzTeams/QuartzTeams/target/javadoc-bundle-options'
 -use
 -version
 -windowtitle
