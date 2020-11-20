@@ -1,0 +1,26 @@
+-classpath
+'/home/runner/.m2/repository/com/google/code/gson/gson/2.8.0/gson-2.8.0.jar:/home/runner/.m2/repository/com/googlecode/json-simple/json-simple/1.1.1/json-simple-1.1.1.jar:/home/runner/.m2/repository/org/bukkit/bukkit/1.15.2-R0.1-SNAPSHOT/bukkit-1.15.2-R0.1-SNAPSHOT.jar:/home/runner/.m2/repository/fr/zcraft/quartzlib/0.0.1/quartzlib-0.0.1.jar:/home/runner/.m2/repository/org/yaml/snakeyaml/1.25/snakeyaml-1.25.jar:/home/runner/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar:/home/runner/.m2/repository/com/google/guava/guava/21.0/guava-21.0.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'/home/runner/work/zTeams/zTeams/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2020. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'/home/runner/work/zTeams/zTeams/target/site/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'quartzteams 1.0-SNAPSHOT API'
+-link
+'https://hub.spigotmc.org/javadocs/bukkit'
+-linkoffline
+'http://docs.oracle.com/javase/8/docs/api' '/home/runner/work/zTeams/zTeams/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'quartzteams 1.0-SNAPSHOT API'
