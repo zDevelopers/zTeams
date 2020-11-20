@@ -6,12 +6,14 @@
 
     <groupId>fr.zcraft</groupId>
     <artifactId>quartzteams</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${revision}</version>
+
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <revision>0.0.1-SNAPSHOT</revision>
     </properties>
 
     <build>
@@ -59,6 +61,15 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+            <!-- In your pom.xml files, use https://maven.zcraft.fr/QuartzTeams -->
+			<url>https://maven.pkg.github.com/zDevelopers/QuartzTeams</url>
+		</repository>
+	</distributionManagement>
 
     <profiles>
         <profile>
