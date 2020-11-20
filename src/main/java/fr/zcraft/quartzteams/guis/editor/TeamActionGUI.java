@@ -73,7 +73,7 @@ public abstract class TeamActionGUI extends ActionGui
                 .lore("")
                 /// Lore of the item displayed if a team was deleted while someone edited it in a GUI.
                 .lore(GuiUtils.generateLore(I.t("{gray}Press {white}Escape{gray} to go back to the teams list.")))
-                .hideAllAttributes()
+                .hideAttributes()
                 .item();
     }
 }

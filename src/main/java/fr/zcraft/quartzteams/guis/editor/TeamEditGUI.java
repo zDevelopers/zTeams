@@ -83,7 +83,7 @@ public class TeamEditGUI extends TeamActionGUI
                 .title(team.getDisplayName())
                 /// Members count in the banner description, in the team edit GUI.
                 .longLore(I.tn("{white}{0} {gray}member", "{white}{0} {gray}members", team.size()))
-                .lore(" ").hideAllAttributes();
+                .lore(" ").hideAttributes();
 
         if (QuartzTeamsPermission.UPDATE_TEAM_BANNER.grantedTo(getPlayer()))
             bannerButton.longLore(I.t("{white}Click with a banner {gray}to update this team's banner"));

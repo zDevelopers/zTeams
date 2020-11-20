@@ -452,7 +452,7 @@ public class QuartzTeam implements Collection<UUID>
         this.banner = new ItemStackBuilder(banner.clone())
                 .title(displayName)
                 .amount(1)
-                .hideAllAttributes()
+                .hideAttributes()
                 .item();
 
         QuartzTeams.fireEvent(new TeamUpdatedEvent(this));
@@ -474,7 +474,7 @@ public class QuartzTeam implements Collection<UUID>
         this.banner = new ItemStackBuilder(ColorsUtils.chat2Block(color.toChatColor(), "BANNER"))
                 .title(displayName)
                 .amount(1)
-                .hideAllAttributes()
+                .hideAttributes()
                 .item();
 
         this.banner.setItemMeta(banner.clone());

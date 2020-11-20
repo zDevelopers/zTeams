@@ -204,7 +204,7 @@ public class TeamsSelectorGUI extends ExplorerGui<QuartzTeam>
                 .title(title)
                 .lore(lore)
                 .glow(QuartzTeams.settings().teamsGUIGlowOnCurrentTeam() && isPlayerInTeam)
-                .hideAllAttributes()
+                .hideAttributes()
                 .item();
     }
 
@@ -220,7 +220,7 @@ public class TeamsSelectorGUI extends ExplorerGui<QuartzTeam>
                             ? I.t("{gray}Click the emerald button below to create one.")
                             /// Subtitle of the item displayed in the teams selector GUI if there isn't anything to display and the player cannot create a team.
                             : I.t("{gray}Wait for an administrator to create one."))
-                    .hideAllAttributes()
+                    .hideAttributes()
                     .item();
         }
         else
@@ -232,7 +232,7 @@ public class TeamsSelectorGUI extends ExplorerGui<QuartzTeam>
                             ? I.t("{gray}You can still click the item below to open your team's settings.")
                             /// Subtitle of the item displayed in the teams selector GUI if teams are not listable by the player, and it is not into a team.
                             : I.t("{gray}Sorry."))
-                    .hideAllAttributes()
+                    .hideAttributes()
                     .item();
         }
     }
