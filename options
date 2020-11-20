@@ -15,7 +15,7 @@
 -docencoding
 'UTF-8'
 -doctitle
-'quartzteams 1.0-SNAPSHOT API'
+'quartzteams 0.0.1-SNAPSHOT API'
 -link
 'https://hub.spigotmc.org/javadocs/bukkit'
 -linkoffline
@@ -23,4 +23,4 @@
 -use
 -version
 -windowtitle
-'quartzteams 1.0-SNAPSHOT API'
+'quartzteams 0.0.1-SNAPSHOT API'
