@@ -29,6 +29,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzteams.permissions;
 
 import fr.zcraft.quartzteams.QuartzTeamsPermission;
@@ -39,11 +40,9 @@ import org.bukkit.permissions.Permissible;
  * A simple and default permission checker that grants permissions if the permissible
  * is an operator or if the action is non-administrative.
  */
-public class OpBasedPermissionsChecker implements PermissionsChecker
-{
+public class OpBasedPermissionsChecker implements PermissionsChecker {
     @Override
-    public boolean hasPermission(Permissible permissible, QuartzTeamsPermission permission)
-    {
+    public boolean hasPermission(Permissible permissible, QuartzTeamsPermission permission) {
         return permissible.isOp() || !permission.isAdministrative();
     }
 }

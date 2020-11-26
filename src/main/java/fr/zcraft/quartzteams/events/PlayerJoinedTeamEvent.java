@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams.events;
 
 import fr.zcraft.quartzteams.QuartzTeam;
@@ -40,30 +41,25 @@ import org.bukkit.event.HandlerList;
 /**
  * Fired when a player actually joins a team.
  */
-public class PlayerJoinedTeamEvent extends TeamChangedEvent
-{
+public class PlayerJoinedTeamEvent extends TeamChangedEvent {
     private static final HandlerList handlers = new HandlerList();
 
     private final OfflinePlayer player;
 
-    public PlayerJoinedTeamEvent(QuartzTeam team, OfflinePlayer player)
-    {
+    public PlayerJoinedTeamEvent(QuartzTeam team, OfflinePlayer player) {
         super(team);
         this.player = player;
     }
 
-    public OfflinePlayer getPlayer()
-    {
-        return player;
-    }
-
-    public HandlerList getHandlers()
-    {
+    public static HandlerList getHandlerList() {
         return handlers;
     }
 
-    public static HandlerList getHandlerList()
-    {
+    public OfflinePlayer getPlayer() {
+        return player;
+    }
+
+    public HandlerList getHandlers() {
         return handlers;
     }
 }

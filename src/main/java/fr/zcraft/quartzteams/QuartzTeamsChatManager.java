@@ -31,11 +31,17 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams;
 
 import fr.zcraft.quartzlib.components.i18n.I;
 import fr.zcraft.quartzlib.core.QuartzComponent;
 import fr.zcraft.quartzlib.tools.text.MessageSender;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -43,14 +49,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-public class QuartzTeamsChatManager extends QuartzComponent implements Listener
-{
+public class QuartzTeamsChatManager extends QuartzComponent implements Listener {
     private final Set<UUID> teamChatLocked = new HashSet<>();
     private final Map<UUID, QuartzTeam> otherTeamChatLocked = new HashMap<>();
     private final Set<UUID> globalSpies = new HashSet<>();
@@ -58,31 +57,27 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
     /**
      * Sends a team-message from the given sender.
      *
-     * @param sender The sender.
+     * @param sender  The sender.
      * @param message The message to send.
      */
-    public void sendTeamMessage(final Player sender, final String message)
-    {
+    public void sendTeamMessage(final Player sender, final String message) {
         sendTeamMessage(sender, message, null);
     }
 
     /**
      * Sends a team-message from the given sender.
      *
-     * @param sender The sender.
+     * @param sender  The sender.
      * @param message The message to send.
-     * @param team If not null, this message will be considered as an external message from another player to this team.
+     * @param team    If not null, this message will be considered as an external message from another player to this team.
      */
-    public void sendTeamMessage(final Player sender, final String message, final QuartzTeam team)
-    {
+    public void sendTeamMessage(final Player sender, final String message, final QuartzTeam team) {
         // Permission check
-        if (team == null && !sender.hasPermission("uh.teamchat.self"))
-        {
+        if (team == null && !sender.hasPermission("uh.teamchat.self")) {
             sender.sendMessage(I.t("{ce}You are not allowed to send a private message to your team."));
             return;
         }
-        if (team != null && !sender.hasPermission("uh.teamchat.others"))
-        {
+        if (team != null && !sender.hasPermission("uh.teamchat.others")) {
             sender.sendMessage(I.t("{ce}You are not allowed to enter in the private chat of another team."));
             return;
         }
@@ -90,23 +85,20 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
         final String rawMessage;
         final QuartzTeam recipient;
 
-        if (team == null)
-        {
+        if (team == null) {
             /// Format of a private team message from a team member. {0} = sender display name, {1} = message.
             rawMessage = I.t("{gold}[{0}{gold} -> his team] {reset}{1}", sender.getDisplayName(), message);
             recipient = QuartzTeams.get().getTeamForPlayer(sender);
 
-            if (recipient == null)
-            {
+            if (recipient == null) {
                 /// Error message if someone try to send a team private message out of any team
                 sender.sendMessage(I.t("{ce}You are not in a team!"));
                 return;
             }
-        }
-        else
-        {
+        } else {
             /// Format of a private team message from a non-team-member. {0} = sender display name, {1} = team display name, {2} = message.
-            rawMessage = I.t("{gold}[{0}{gold} -> team {1}{gold}] {reset}{2}", sender.getDisplayName(), team.getDisplayName(), message);
+            rawMessage = I.t("{gold}[{0}{gold} -> team {1}{gold}] {reset}{2}", sender.getDisplayName(),
+                    team.getDisplayName(), message);
             recipient = team;
         }
 
@@ -117,32 +109,31 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * Sends a raw team-message from the given player.
      *
      * @param rawMessage The raw message to be sent.
-     * @param team The recipient of this message.
+     * @param team       The recipient of this message.
      */
-    private void sendRawTeamMessage(final String rawMessage, final QuartzTeam team)
-    {
+    private void sendRawTeamMessage(final String rawMessage, final QuartzTeam team) {
         // The message is sent to the players of the team...
         team.getOnlinePlayers().forEach(player -> MessageSender.sendChatMessage(player, rawMessage));
 
         // ... to the spies ...
-        if (otherTeamChatLocked.containsValue(team))
-        {
+        if (otherTeamChatLocked.containsValue(team)) {
             // The message is only sent to the spies not in the team, to avoid double messages
             otherTeamChatLocked.keySet().stream()
-                    .filter(playerId -> otherTeamChatLocked.containsKey(playerId) && otherTeamChatLocked.get(playerId).equals(team))
+                    .filter(playerId -> otherTeamChatLocked.containsKey(playerId) &&
+                            otherTeamChatLocked.get(playerId).equals(team))
                     .filter(playerId -> !team.containsPlayer(playerId))
                     .forEach(playerId -> MessageSender.sendChatMessage(Bukkit.getPlayer(playerId), rawMessage));
         }
 
         // ... to the global spies ...
         globalSpies.stream()
-                .filter(playerId -> !otherTeamChatLocked.containsKey(playerId) || !otherTeamChatLocked.get(playerId).equals(team))
+                .filter(playerId -> !otherTeamChatLocked.containsKey(playerId) ||
+                        !otherTeamChatLocked.get(playerId).equals(team))
                 .filter(playerId -> !team.containsPlayer(playerId))
                 .forEach(playerId -> MessageSender.sendChatMessage(Bukkit.getPlayer(playerId), rawMessage));
 
         // ... and to the console.
-        if (QuartzTeams.settings().teamChatLogInConsole())
-        {
+        if (QuartzTeams.settings().teamChatLogInConsole()) {
             Bukkit.getConsoleSender().sendMessage(rawMessage);
         }
     }
@@ -150,11 +141,10 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
     /**
      * Sends a global message from the given player.
      *
-     * @param sender The sender of this message.
+     * @param sender  The sender of this message.
      * @param message The message to be sent.
      */
-    public void sendGlobalMessage(final Player sender, final String message)
-    {
+    public void sendGlobalMessage(final Player sender, final String message) {
         // This message will be sent synchronously.
         // The players' messages are sent asynchronously.
         // That's how we differentiates the messages sent through /g and the messages sent using
@@ -169,8 +159,7 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * @param playerID The chat of this player will be toggled.
      * @return {@code true} if the chat is now the team chat; false else.
      */
-    public boolean toggleChatForPlayer(final UUID playerID)
-    {
+    public boolean toggleChatForPlayer(final UUID playerID) {
         return toggleChatForPlayer(playerID, null);
     }
 
@@ -178,34 +167,26 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * Toggles the chat between the global chat and the team chat.
      *
      * @param playerID The chat of this player will be toggled.
-     * @param team The team to chat with. If null, the player's team will be used.
+     * @param team     The team to chat with. If null, the player's team will be used.
      * @return {@code true} if the chat is now the team chat; false else.
      */
-    public boolean toggleChatForPlayer(final UUID playerID, final QuartzTeam team)
-    {
+    public boolean toggleChatForPlayer(final UUID playerID, final QuartzTeam team) {
         // If the team is not null, we will always go to the team chat
         // Else, normal toggle
 
-        if (team != null)
-        {
+        if (team != null) {
             // if the player was in another team chat before, we removes it.
             teamChatLocked.remove(playerID);
             otherTeamChatLocked.put(playerID, team);
 
             return true;
-        }
-
-        else
-        {
-            if (isAnyTeamChatEnabled(playerID))
-            {
+        } else {
+            if (isAnyTeamChatEnabled(playerID)) {
                 teamChatLocked.remove(playerID);
                 otherTeamChatLocked.remove(playerID);
 
                 return false;
-            }
-            else
-            {
+            } else {
                 teamChatLocked.add(playerID);
 
                 return true;
@@ -219,8 +200,7 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * @param player The chat of this player will be toggled.
      * @return {@code true} if the chat is now the team chat; false else.
      */
-    public boolean toggleChatForPlayer(final Player player)
-    {
+    public boolean toggleChatForPlayer(final Player player) {
         return toggleChatForPlayer(player.getUniqueId(), null);
     }
 
@@ -228,11 +208,10 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * Toggles the chat between the global chat and the team chat.
      *
      * @param player The chat of this player will be toggled.
-     * @param team The team to chat with. If null, the player's team will be used.
+     * @param team   The team to chat with. If null, the player's team will be used.
      * @return {@code true} if the chat is now the team chat; false else.
      */
-    public boolean toggleChatForPlayer(final Player player, final QuartzTeam team)
-    {
+    public boolean toggleChatForPlayer(final Player player, final QuartzTeam team) {
         return toggleChatForPlayer(player.getUniqueId(), team);
     }
 
@@ -240,17 +219,13 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * Returns true if the team chat is enabled for the given player.
      *
      * @param playerID The player's UUID.
-     * @param team If non-null, this will check if the given player is spying the current team.
+     * @param team     If non-null, this will check if the given player is spying the current team.
      * @return {@code true} if the team chat is enabled for the given player.
      */
-    public boolean isTeamChatEnabled(final UUID playerID, final QuartzTeam team)
-    {
-        if (team == null)
-        {
+    public boolean isTeamChatEnabled(final UUID playerID, final QuartzTeam team) {
+        if (team == null) {
             return teamChatLocked.contains(playerID);
-        }
-        else
-        {
+        } else {
             final QuartzTeam lockedTeam = this.otherTeamChatLocked.get(playerID);
             final QuartzTeam playerTeam = QuartzTeams.get().getTeamForPlayer(playerID);
 
@@ -264,8 +239,7 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * @param playerID The player's UUID.
      * @return {@code true} if the team chat is enabled for the given player.
      */
-    public boolean isTeamChatEnabled(final UUID playerID)
-    {
+    public boolean isTeamChatEnabled(final UUID playerID) {
         return this.isTeamChatEnabled(playerID, null);
     }
 
@@ -273,11 +247,10 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * Returns true if the team chat is enabled for the given player.
      *
      * @param player The player.
-     * @param team If non-null, this will check if the given player is spying the current team.
+     * @param team   If non-null, this will check if the given player is spying the current team.
      * @return {@code true} if the team chat is enabled for the given player.
      */
-    public boolean isTeamChatEnabled(final Player player, final QuartzTeam team)
-    {
+    public boolean isTeamChatEnabled(final Player player, final QuartzTeam team) {
         return isTeamChatEnabled(player.getUniqueId(), team);
     }
 
@@ -287,8 +260,7 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * @param player The player.
      * @return {@code true} if the team chat is enabled for the given player.
      */
-    public boolean isTeamChatEnabled(final Player player)
-    {
+    public boolean isTeamChatEnabled(final Player player) {
         return isTeamChatEnabled(player.getUniqueId(), null);
     }
 
@@ -298,8 +270,7 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * @param playerID The player's UUID.
      * @return {@code true} if the given player is in the team chat of another team.
      */
-    public boolean isOtherTeamChatEnabled(final UUID playerID)
-    {
+    public boolean isOtherTeamChatEnabled(final UUID playerID) {
         return otherTeamChatLocked.containsKey(playerID);
     }
 
@@ -309,8 +280,7 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * @param player The player.
      * @return {@code true} if the given player is in the team chat of another team.
      */
-    public boolean isOtherTeamChatEnabled(final Player player)
-    {
+    public boolean isOtherTeamChatEnabled(final Player player) {
         return isOtherTeamChatEnabled(player.getUniqueId());
     }
 
@@ -320,8 +290,7 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * @param playerID The player's UUID.
      * @return {@code true} if a team chat is enabled for the given player.
      */
-    public boolean isAnyTeamChatEnabled(final UUID playerID)
-    {
+    public boolean isAnyTeamChatEnabled(final UUID playerID) {
         return (teamChatLocked.contains(playerID) || otherTeamChatLocked.containsKey(playerID));
     }
 
@@ -331,8 +300,7 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * @param player The player.
      * @return {@code true} if a team chat is enabled for the given player.
      */
-    public boolean isAnyTeamChatEnabled(final Player player)
-    {
+    public boolean isAnyTeamChatEnabled(final Player player) {
         return isAnyTeamChatEnabled(player.getUniqueId());
     }
 
@@ -343,8 +311,7 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * @param player The player.
      * @return The other team viewed by the given player.
      */
-    public QuartzTeam getOtherTeamEnabled(final Player player)
-    {
+    public QuartzTeam getOtherTeamEnabled(final Player player) {
         return otherTeamChatLocked.get(player.getUniqueId());
     }
 
@@ -354,8 +321,7 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      *
      * @param playerID The spy's UUID.
      */
-    public void addGlobalSpy(final UUID playerID)
-    {
+    public void addGlobalSpy(final UUID playerID) {
         globalSpies.add(playerID);
     }
 
@@ -364,8 +330,7 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      *
      * @param playerID The spy's UUID.
      */
-    public void removeGlobalSpy(final UUID playerID)
-    {
+    public void removeGlobalSpy(final UUID playerID) {
         globalSpies.remove(playerID);
     }
 
@@ -375,11 +340,9 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      * @param playerID The spy's UUID.
      * @return {@code true} if spying.
      */
-    public boolean isGlobalSpy(final UUID playerID)
-    {
+    public boolean isGlobalSpy(final UUID playerID) {
         return globalSpies.contains(playerID);
     }
-
 
 
     /**
@@ -387,20 +350,16 @@ public class QuartzTeamsChatManager extends QuartzComponent implements Listener
      */
     // Priority LOWEST to be able to cancel the event before all other plugins
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onAsyncPlayerChat(final AsyncPlayerChatEvent ev)
-    {
+    public void onAsyncPlayerChat(final AsyncPlayerChatEvent ev) {
         // If the event is asynchronous, the message was sent by a "real" player.
         // Else, the message was sent by a plugin (like our /g command, or another plugin), and
         // the event is ignored.
-        if (ev.isAsynchronous())
-        {
-            if (isTeamChatEnabled(ev.getPlayer()))
-            {
+        if (ev.isAsynchronous()) {
+            if (isTeamChatEnabled(ev.getPlayer())) {
                 ev.setCancelled(true);
                 sendTeamMessage(ev.getPlayer(), ev.getMessage());
-            }
-            else if (isOtherTeamChatEnabled(ev.getPlayer()) && QuartzTeamsPermission.TALK_IN_OTHER_TEAM_CHAT.grantedTo(ev.getPlayer()))
-            {
+            } else if (isOtherTeamChatEnabled(ev.getPlayer()) &&
+                    QuartzTeamsPermission.TALK_IN_OTHER_TEAM_CHAT.grantedTo(ev.getPlayer())) {
                 ev.setCancelled(true);
                 sendTeamMessage(ev.getPlayer(), ev.getMessage(), getOtherTeamEnabled(ev.getPlayer()));
             }

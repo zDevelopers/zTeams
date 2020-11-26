@@ -29,6 +29,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzteams.guis.builder;
 
 import fr.zcraft.quartzlib.components.gui.Gui;
@@ -40,18 +41,15 @@ import fr.zcraft.quartzteams.colors.TeamColor;
 import org.bukkit.Material;
 
 
-public class TeamBuilderStepNameGUI extends TeamBuilderBaseGUI
-{
+public class TeamBuilderStepNameGUI extends TeamBuilderBaseGUI {
     private final TeamColor color;
 
-    public TeamBuilderStepNameGUI(TeamColor color)
-    {
+    public TeamBuilderStepNameGUI(TeamColor color) {
         this.color = color;
     }
 
     @Override
-    protected void onUpdate()
-    {
+    protected void onUpdate() {
         /// The title of the name selector GUI, in the create team GUIs
         setTitle(I.t("New team » {black}Name"));
         setSize(6 * 9);
@@ -66,22 +64,26 @@ public class TeamBuilderStepNameGUI extends TeamBuilderBaseGUI
         );
     }
 
-    @GuiAction ("name")
-    protected void name()
-    {
+    @GuiAction("name")
+    protected void name() {
         Gui.open(getPlayer(), new PromptGui(name ->
         {
-            if (name.trim().isEmpty())
+            if (name.trim().isEmpty()) {
                 Gui.open(getPlayer(), new TeamBuilderStepNameGUI(getColor()));
-            else
+            } else {
                 Gui.open(getPlayer(), new TeamBuilderStepPlayersGUI(getColor(), name));
+            }
         }));
     }
 
 
     @Override
-    protected TeamColor getColor() { return color; }
+    protected TeamColor getColor() {
+        return color;
+    }
 
     @Override
-    protected String getName() { return null; }
+    protected String getName() {
+        return null;
+    }
 }

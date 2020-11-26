@@ -29,22 +29,20 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzteams.guis.utils;
 
+import java.util.Comparator;
 import org.bukkit.OfflinePlayer;
 
-import java.util.Comparator;
 
-
-public class OfflinePlayersComparator implements Comparator<OfflinePlayer>
-{
+public class OfflinePlayersComparator implements Comparator<OfflinePlayer> {
     @Override
-    public int compare(OfflinePlayer player1, OfflinePlayer player2)
-    {
-        if (player1.isOnline() == player2.isOnline())
-        {
+    public int compare(OfflinePlayer player1, OfflinePlayer player2) {
+        if (player1.isOnline() == player2.isOnline()) {
             return player1.getName().toLowerCase().compareTo(player2.getName().toLowerCase());
+        } else {
+            return player1.isOnline() ? -1 : 1;
         }
-        else return player1.isOnline() ? -1 : 1;
     }
 }

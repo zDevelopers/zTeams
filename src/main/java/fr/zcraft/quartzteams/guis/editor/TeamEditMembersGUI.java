@@ -29,6 +29,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzteams.guis.editor;
 
 import fr.zcraft.quartzlib.components.gui.ExplorerGui;
@@ -50,19 +51,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 
-public class TeamEditMembersGUI extends ExplorerGui<OfflinePlayer>
-{
+public class TeamEditMembersGUI extends ExplorerGui<OfflinePlayer> {
     private final QuartzTeam team;
 
-    public TeamEditMembersGUI(QuartzTeam team)
-    {
+    public TeamEditMembersGUI(QuartzTeam team) {
         this.team = team;
     }
 
 
     @Override
-    protected void onUpdate()
-    {
+    protected void onUpdate() {
         /// The title of the edit team members GUI. {0} = team name (raw).
         setTitle(I.t("{0} » {black}Members", team.getName()));
         setKeepHorizontalScrollingSpace(true);
@@ -78,8 +76,7 @@ public class TeamEditMembersGUI extends ExplorerGui<OfflinePlayer>
     }
 
     @Override
-    protected ItemStack getViewItem(OfflinePlayer player)
-    {
+    protected ItemStack getViewItem(OfflinePlayer player) {
         final String displayName = player instanceof Player ? ((Player) player).getDisplayName() : player.getName();
         final QuartzTeam team = QuartzTeams.get().getTeamForPlayer(player);
 
@@ -87,30 +84,31 @@ public class TeamEditMembersGUI extends ExplorerGui<OfflinePlayer>
 
         return new ItemStackBuilder(Material.PLAYER_HEAD)
                 .title(I.t("{reset}{0}", displayName))
-                    .lore(player.isOnline() ? I.t("{gray}Online") : I.t("{gray}Offline"))
-                    .lore(team != null ? I.t("{gray}Current team: {0}", team.getDisplayName()) : I.t("{gray}Current team: none"))
-                    .loreLine()
-                    .lore(inThisTeam ? I.t("{darkgray}» {white}Click {gray}to remove this player") : I.t("{darkgray}» {white}Click {gray}to add this player"))
+                .lore(player.isOnline() ? I.t("{gray}Online") : I.t("{gray}Offline"))
+                .lore(team != null ? I.t("{gray}Current team: {0}", team.getDisplayName()) :
+                        I.t("{gray}Current team: none"))
+                .loreLine()
+                .lore(inThisTeam ? I.t("{darkgray}» {white}Click {gray}to remove this player") :
+                        I.t("{darkgray}» {white}Click {gray}to add this player"))
                 .withMeta((SkullMeta s) -> s.setOwningPlayer(player))
                 .item();
     }
 
     @Override
-    protected ItemStack getPickedUpItem(OfflinePlayer player)
-    {
-        if (team.containsPlayer(player.getUniqueId()))
+    protected ItemStack getPickedUpItem(OfflinePlayer player) {
+        if (team.containsPlayer(player.getUniqueId())) {
             team.removePlayer(player);
-        else
+        } else {
             team.addPlayer(player);
+        }
 
         update();
 
         return null;
     }
 
-    @GuiAction ("back")
-    protected void back()
-    {
+    @GuiAction("back")
+    protected void back() {
         close();
     }
 }

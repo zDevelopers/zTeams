@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams.events;
 
 import fr.zcraft.quartzteams.QuartzTeam;
@@ -41,29 +42,24 @@ import org.bukkit.event.HandlerList;
 /**
  * Base class for all zTeams events.
  */
-public abstract class QuartzTeamsEvent extends Event
-{
+public abstract class QuartzTeamsEvent extends Event {
     private static final HandlerList handlers = new HandlerList();
 
     final protected QuartzTeam team;
 
-    public QuartzTeamsEvent(final QuartzTeam team)
-    {
+    public QuartzTeamsEvent(final QuartzTeam team) {
         this.team = team;
     }
 
-    public QuartzTeam getTeam()
-    {
-        return team;
-    }
-
-    public HandlerList getHandlers()
-    {
+    public static HandlerList getHandlerList() {
         return handlers;
     }
 
-    public static HandlerList getHandlerList()
-    {
+    public QuartzTeam getTeam() {
+        return team;
+    }
+
+    public HandlerList getHandlers() {
         return handlers;
     }
 }

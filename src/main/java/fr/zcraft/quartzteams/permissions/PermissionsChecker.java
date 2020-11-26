@@ -29,6 +29,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzteams.permissions;
 
 import fr.zcraft.quartzteams.QuartzTeamsPermission;
@@ -38,14 +39,12 @@ import org.bukkit.permissions.Permissible;
 /**
  * Permissions checker for zTeams actions in GUIs or commands.
  */
-public interface PermissionsChecker
-{
+public interface PermissionsChecker {
     /**
      * Checks if the given permissible is allowed to do the given action.
      *
      * @param permissible The permissible.
-     * @param permission The checked permission.
-     *
+     * @param permission  The checked permission.
      * @return {@code true} if allowed.
      */
     boolean hasPermission(Permissible permissible, QuartzTeamsPermission permission);

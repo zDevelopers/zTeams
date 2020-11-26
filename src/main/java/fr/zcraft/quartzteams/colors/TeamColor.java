@@ -29,22 +29,21 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
-package fr.zcraft.quartzteams.colors;
 
-import org.bukkit.ChatColor;
+package fr.zcraft.quartzteams.colors;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.bukkit.ChatColor;
 
 
 /**
  * Represents a team color.
- *
+ * <p>
  * Also used to convert a string to a ChatColor object.
  */
-public enum TeamColor
-{
+public enum TeamColor {
     AQUA("Aqua", ChatColor.AQUA),
     BLACK("Black", ChatColor.BLACK),
     BLUE("Blue", ChatColor.BLUE),
@@ -65,28 +64,21 @@ public enum TeamColor
     RANDOM("?", null); // Must be the last one.
 
 
-    private static Map<ChatColor, TeamColor> BY_CHAT_COLOR = new HashMap<>();
+    private static final Map<ChatColor, TeamColor> BY_CHAT_COLOR = new HashMap<>();
 
-    static
-    {
+    static {
         Arrays.stream(values())
                 .filter(color -> color.toChatColor() != null)
                 .forEach(color -> BY_CHAT_COLOR.put(color.toChatColor(), color));
     }
 
 
-    private String name;
-    private ChatColor color;
+    private final String name;
+    private final ChatColor color;
 
-    TeamColor(String name, ChatColor color)
-    {
+    TeamColor(String name, ChatColor color) {
         this.name = name;
         this.color = color;
-    }
-
-    public ChatColor toChatColor()
-    {
-        return this.color;
     }
 
     /**
@@ -95,8 +87,7 @@ public enum TeamColor
      * @param name The name of the color.
      * @return The ChatColor object (null if RANDOM or not found).
      */
-    public static ChatColor getChatColorByName(String name)
-    {
+    public static ChatColor getChatColorByName(String name) {
         return Arrays.stream(values())
                 .filter(color -> color.name.equalsIgnoreCase(name))
                 .findFirst()
@@ -110,19 +101,15 @@ public enum TeamColor
      * @param name The name to get.
      * @return A TeamColor value, or null if no value found.
      */
-    public static TeamColor fromString(String name)
-    {
-        if (name.equals("?"))
-        {
+    public static TeamColor fromString(String name) {
+        if (name.equals("?")) {
             return RANDOM;
         }
 
-        try
-        {
+        try {
             return valueOf(name.trim().toUpperCase());
         }
-        catch (IllegalArgumentException e)
-        {
+        catch (IllegalArgumentException e) {
             // Maybe a color without underscore
             return Arrays.stream(values())
                     .filter(color -> color.name.equalsIgnoreCase(name))
@@ -136,8 +123,11 @@ public enum TeamColor
      * @param color The ChatColor.
      * @return The corresponding TeamColor.
      */
-    public static TeamColor fromChatColor(ChatColor color)
-    {
+    public static TeamColor fromChatColor(ChatColor color) {
         return BY_CHAT_COLOR.get(color);
+    }
+
+    public ChatColor toChatColor() {
+        return this.color;
     }
 }

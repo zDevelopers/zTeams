@@ -29,6 +29,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzteams.guis.editor;
 
 import fr.zcraft.quartzlib.components.gui.ActionGui;
@@ -41,35 +42,34 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 
-public abstract class TeamActionGUI extends ActionGui
-{
+public abstract class TeamActionGUI extends ActionGui {
     protected final QuartzTeam team;
 
-    public TeamActionGUI(QuartzTeam team)
-    {
+    public TeamActionGUI(QuartzTeam team) {
         this.team = team;
     }
 
     /**
      * Checks if the team still exists.
+     *
      * @return {@code true} if the team exists.
      */
-    protected boolean exists()
-    {
+    protected boolean exists() {
         return QuartzTeams.get().isTeamRegistered(team);
     }
 
     /**
      * Generates the item to display if the team was deleted while a player edited the team on a GUI.
+     *
      * @return the item.
      */
-    protected ItemStack getDeletedItem()
-    {
+    protected ItemStack getDeletedItem() {
         return new ItemStackBuilder(Material.BARRIER)
                 /// Title of the item displayed if a team was deleted while someone edited it in a GUI.
                 .title(I.t("{red}Team deleted"))
                 /// Lore of the item displayed if a team was deleted while someone edited it in a GUI.
-                .lore(GuiUtils.generateLore(I.t("{gray}The team {0}{gray} was deleted by another player.", team.getDisplayName())))
+                .lore(GuiUtils.generateLore(
+                        I.t("{gray}The team {0}{gray} was deleted by another player.", team.getDisplayName())))
                 .lore("")
                 /// Lore of the item displayed if a team was deleted while someone edited it in a GUI.
                 .lore(GuiUtils.generateLore(I.t("{gray}Press {white}Escape{gray} to go back to the teams list.")))

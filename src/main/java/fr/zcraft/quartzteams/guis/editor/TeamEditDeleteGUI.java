@@ -29,6 +29,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzteams.guis.editor;
 
 import fr.zcraft.quartzlib.components.gui.Gui;
@@ -41,39 +42,33 @@ import fr.zcraft.quartzteams.guis.TeamsSelectorGUI;
 import org.bukkit.Material;
 
 
-public class TeamEditDeleteGUI extends TeamActionGUI
-{
-    public TeamEditDeleteGUI(QuartzTeam team)
-    {
+public class TeamEditDeleteGUI extends TeamActionGUI {
+    public TeamEditDeleteGUI(QuartzTeam team) {
         super(team);
     }
 
 
     @Override
-    protected void onUpdate()
-    {
+    protected void onUpdate() {
         /// The title of the delete team GUI. {0} = team name (raw).
         setTitle(I.t("{0} » {darkred}Delete", team.getName()));
         setSize(9);
 
-        if (!exists())
-        {
+        if (!exists()) {
             action("", 4, getDeletedItem());
             return;
         }
 
-        for (int slot = 0; slot < 3; slot++)
-        {
+        for (int slot = 0; slot < 3; slot++) {
             action("keep", slot, new ItemStackBuilder(Material.LIME_STAINED_GLASS_PANE)
-                /// The title of the "keep" button in the delete team GUI
-                .title(I.t("{green}Keep this team alive"))
+                    /// The title of the "keep" button in the delete team GUI
+                    .title(I.t("{green}Keep this team alive"))
             );
         }
 
         action("", 4, team.getBanner());
 
-        for (int slot = 6; slot < 9; slot++)
-        {
+        for (int slot = 6; slot < 9; slot++) {
             action("delete", slot, new ItemStackBuilder(Material.RED_STAINED_GLASS_PANE)
                     /// The title of the "delete" button in the delete team GUI
                     .title(I.t("{red}Delete this team {italic}forever"))
@@ -82,15 +77,13 @@ public class TeamEditDeleteGUI extends TeamActionGUI
     }
 
 
-    @GuiAction ("keep")
-    protected void keep()
-    {
+    @GuiAction("keep")
+    protected void keep() {
         close();
     }
 
-    @GuiAction ("delete")
-    protected void delete()
-    {
+    @GuiAction("delete")
+    protected void delete() {
         QuartzTeams.get().unregisterTeam(team);
         Gui.open(getPlayer(), new TeamsSelectorGUI());
     }

@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams.commands;
 
 import fr.zcraft.quartzlib.components.commands.Command;
@@ -39,14 +40,11 @@ import fr.zcraft.quartzlib.components.commands.CommandInfo;
 import fr.zcraft.quartzlib.components.i18n.I;
 import fr.zcraft.quartzteams.QuartzTeams;
 
-@CommandInfo (name = "global-chat", usageParameters = "<message>", aliases = "g")
-public class GlobalChatCommand extends Command
-{
+@CommandInfo(name = "global-chat", usageParameters = "<message>", aliases = "g")
+public class GlobalChatCommand extends Command {
     @Override
-    protected void run() throws CommandException
-    {
-        if (args.length == 0)
-        {
+    protected void run() throws CommandException {
+        if (args.length == 0) {
             throwInvalidArgument(I.t("Nothing to send to everyone."));
         }
 

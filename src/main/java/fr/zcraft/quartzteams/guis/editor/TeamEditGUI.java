@@ -29,6 +29,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzteams.guis.editor;
 
 import fr.zcraft.quartzlib.components.gui.Gui;
@@ -48,31 +49,24 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 
-public class TeamEditGUI extends TeamActionGUI
-{
-    public TeamEditGUI(QuartzTeam team)
-    {
+public class TeamEditGUI extends TeamActionGUI {
+    public TeamEditGUI(QuartzTeam team) {
         super(team);
     }
 
 
     @Override
-    protected void onUpdate()
-    {
-        if (getParent() != null)
-        {
+    protected void onUpdate() {
+        if (getParent() != null) {
             /// The title of the edit team GUI. {0} = team display name.
             setTitle(I.t("Teams » {black}{0}", team.getDisplayName()));
-        }
-        else
-        {
+        } else {
             setTitle(ChatColor.BLACK + team.getDisplayName());
         }
 
         setSize(getParent() != null ? 36 : 27);
 
-        if (!exists())
-        {
+        if (!exists()) {
             action("", 13, getDeletedItem());
             return;
         }
@@ -86,10 +80,11 @@ public class TeamEditGUI extends TeamActionGUI
                 .longLore(I.tn("{white}{0} {gray}member", "{white}{0} {gray}members", team.size()))
                 .lore(" ").hideAllAttributes();
 
-        if (QuartzTeamsPermission.UPDATE_TEAM_BANNER.grantedTo(getPlayer()))
+        if (QuartzTeamsPermission.UPDATE_TEAM_BANNER.grantedTo(getPlayer())) {
             bannerButton.longLore(I.t("{white}Click with a banner {gray}to update this team's banner"));
-        else
+        } else {
             bannerButton.longLore(I.t("{gray}You're not allowed to update this team's banner."));
+        }
 
         action("banner", 9, bannerButton);
 
@@ -101,13 +96,14 @@ public class TeamEditGUI extends TeamActionGUI
                 /// Update team color button in edit GUI.
                 .title(I.t("{green}Update the color"))
                 .longLore(I.tc(
-                    /// Current team color in edit GUI. {0} = formatted color name.
-                    "current_team_color", "{gray}Current: {white}{0}",
-                    team.getColorOrWhite().toChatColor() + TextUtils.friendlyEnumName(team.getColorOrWhite())
+                        /// Current team color in edit GUI. {0} = formatted color name.
+                        "current_team_color", "{gray}Current: {white}{0}",
+                        team.getColorOrWhite().toChatColor() + TextUtils.friendlyEnumName(team.getColorOrWhite())
                 ));
 
-        if (!QuartzTeamsPermission.UPDATE_TEAM_COLOR.grantedTo(getPlayer()))
+        if (!QuartzTeamsPermission.UPDATE_TEAM_COLOR.grantedTo(getPlayer())) {
             colorButton.lore(" ").longLore(I.t("{gray}You're not allowed to update this team's color."));
+        }
 
         action("color", 11, colorButton);
 
@@ -120,8 +116,9 @@ public class TeamEditGUI extends TeamActionGUI
                 /// Current team name in edit GUI. {0} = raw team name.
                 .longLore(I.tc("current_team_name", "{gray}Current: {white}{0}", team.getName()));
 
-        if (!QuartzTeamsPermission.UPDATE_TEAM_NAME.grantedTo(getPlayer()))
+        if (!QuartzTeamsPermission.UPDATE_TEAM_NAME.grantedTo(getPlayer())) {
             nameButton.lore(" ").longLore(I.t("{gray}You're not allowed to update this team's name."));
+        }
 
         action("name", 13, nameButton);
 
@@ -130,26 +127,23 @@ public class TeamEditGUI extends TeamActionGUI
 
         final ItemStackBuilder membersButton = new ItemStackBuilder(Material.PLAYER_HEAD);
 
-        for (OfflinePlayer player : team.getPlayers())
-        {
-            if (player.isOnline())
+        for (OfflinePlayer player : team.getPlayers()) {
+            if (player.isOnline()) {
                 membersButton.lore(I.t("{green} • ") + ChatColor.RESET + player.getName());
-            else
+            } else {
                 membersButton.lore(I.t("{gray} • ") + ChatColor.RESET + player.getName());
+            }
         }
 
-        if (QuartzTeamsPermission.UPDATE_TEAMS_PLAYERS_LIST.grantedTo(getPlayer()))
-        {
+        if (QuartzTeamsPermission.UPDATE_TEAMS_PLAYERS_LIST.grantedTo(getPlayer())) {
             membersButton
-                /// Update team members button in edit GUI.
-                .title(I.t("{green}Add or remove players"))
-                .lore(" ").longLore(I.t("{white}Click {gray}to add or remove players"));
-        }
-        else
-        {
+                    /// Update team members button in edit GUI.
+                    .title(I.t("{green}Add or remove players"))
+                    .lore(" ").longLore(I.t("{white}Click {gray}to add or remove players"));
+        } else {
             membersButton
-                .title(I.t("{green}Players list"))
-                .lore(" ").longLore(I.t("{gray}You're not allowed to add or remove players."));
+                    .title(I.t("{green}Players list"))
+                    .lore(" ").longLore(I.t("{gray}You're not allowed to add or remove players."));
         }
 
         action("members", 15, membersButton);
@@ -161,10 +155,11 @@ public class TeamEditGUI extends TeamActionGUI
                 /// Delete team button in edit GUI.
                 .title(I.t("{red}Delete this team"));
 
-        if (QuartzTeamsPermission.DELETE_TEAM.grantedTo(getPlayer()))
+        if (QuartzTeamsPermission.DELETE_TEAM.grantedTo(getPlayer())) {
             deleteButton.longLore(I.t("{gray}Cannot be undone"));
-        else
+        } else {
             deleteButton.longLore(I.t("{gray}You're not allowed to delete this team."));
+        }
 
 
         // Delete
@@ -177,8 +172,7 @@ public class TeamEditGUI extends TeamActionGUI
         ));
 
         // Exit
-        if (getParent() != null)
-        {
+        if (getParent() != null) {
             action("exit", getSize() - 5, GuiUtils.makeItem(
                     Material.EMERALD,
                     /// Go back button in GUIs.
@@ -188,49 +182,56 @@ public class TeamEditGUI extends TeamActionGUI
     }
 
 
-    @GuiAction ("banner")
-    protected void banner(InventoryClickEvent ev)
-    {
-        if (!QuartzTeamsPermission.UPDATE_TEAM_BANNER.grantedTo(getPlayer())) return;
+    @GuiAction("banner")
+    protected void banner(InventoryClickEvent ev) {
+        if (!QuartzTeamsPermission.UPDATE_TEAM_BANNER.grantedTo(getPlayer())) {
+            return;
+        }
 
-        if (ev.getCursor() != null && ev.getCursor().getType().name().endsWith("_BANNER"))
-        {
+        if (ev.getCursor() != null && ev.getCursor().getType().name().endsWith("_BANNER")) {
             team.setBanner(ev.getCursor());
             update();
         }
     }
 
-    @GuiAction ("color")
-    protected void color()
-    {
-        if (!QuartzTeamsPermission.UPDATE_TEAM_COLOR.grantedTo(getPlayer())) return;
+    @GuiAction("color")
+    protected void color() {
+        if (!QuartzTeamsPermission.UPDATE_TEAM_COLOR.grantedTo(getPlayer())) {
+            return;
+        }
         Gui.open(getPlayer(), new TeamEditColorGUI(team), this);
     }
 
-    @GuiAction ("name")
-    protected void name()
-    {
-        if (!QuartzTeamsPermission.UPDATE_TEAM_NAME.grantedTo(getPlayer())) return;
-        Gui.open(getPlayer(), new PromptGui(name -> { if (!name.trim().isEmpty()) team.setName(name); }, team.getName()), this);
+    @GuiAction("name")
+    protected void name() {
+        if (!QuartzTeamsPermission.UPDATE_TEAM_NAME.grantedTo(getPlayer())) {
+            return;
+        }
+        Gui.open(getPlayer(), new PromptGui(name -> {
+            if (!name.trim().isEmpty()) {
+                team.setName(name);
+            }
+        }, team.getName()), this);
     }
 
-    @GuiAction ("members")
-    protected void members()
-    {
-        if (!QuartzTeamsPermission.UPDATE_TEAMS_PLAYERS_LIST.grantedTo(getPlayer())) return;
+    @GuiAction("members")
+    protected void members() {
+        if (!QuartzTeamsPermission.UPDATE_TEAMS_PLAYERS_LIST.grantedTo(getPlayer())) {
+            return;
+        }
         Gui.open(getPlayer(), new TeamEditMembersGUI(team), this);
     }
 
-    @GuiAction ("delete")
-    protected void delete()
-    {
-        if (!QuartzTeamsPermission.DELETE_TEAM.grantedTo(getPlayer())) return;
+    @GuiAction("delete")
+    protected void delete() {
+        if (!QuartzTeamsPermission.DELETE_TEAM.grantedTo(getPlayer())) {
+            return;
+        }
         Gui.open(getPlayer(), new TeamEditDeleteGUI(team), this);
     }
 
-    @GuiAction ("exit")
-    protected void exit()
-    {
+    @GuiAction("exit")
+    protected void exit() {
         close();
     }
 }

@@ -31,14 +31,14 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams;
 
 import fr.zcraft.quartzteams.permissions.PermissionsChecker;
 import org.bukkit.permissions.Permissible;
 
 
-public enum QuartzTeamsPermission
-{
+public enum QuartzTeamsPermission {
     CREATE_TEAM("Allows an user to create a team", false),
     DELETE_TEAM("Allows an user to delete a team", true),
     RESET_TEAMS("Allows an user to delete all teams", true),
@@ -62,15 +62,12 @@ public enum QuartzTeamsPermission
     SPY_TEAM_CHAT("Allows an user to enter the private team chat of another team", true),
     TALK_IN_OTHER_TEAM_CHAT("Allows an user to talk inside the private team chat of another team", true),
     SPY_ALL_TEAMS("Allows an user to see the private team chat of all other teams", true),
-    MAKE_ANOTHER_SPY_ALL_TEAMS("Allows an user to enable spy mode for another player", true)
-
-    ;
+    MAKE_ANOTHER_SPY_ALL_TEAMS("Allows an user to enable spy mode for another player", true);
 
     private final String description;
     private final boolean administrative;
 
-    QuartzTeamsPermission(final String description, final boolean administrative)
-    {
+    QuartzTeamsPermission(final String description, final boolean administrative) {
         this.description = description;
         this.administrative = administrative;
     }
@@ -78,16 +75,14 @@ public enum QuartzTeamsPermission
     /**
      * @return A description of the permission in English.
      */
-    public String getDescription()
-    {
+    public String getDescription() {
         return description;
     }
 
     /**
      * @return {@code true} if the permission is considered as administrative.
      */
-    public boolean isAdministrative()
-    {
+    public boolean isAdministrative() {
         return administrative;
     }
 
@@ -98,8 +93,7 @@ public enum QuartzTeamsPermission
      * @param permissible The permissible.
      * @return {@code true} if the permission is granted.
      */
-    public boolean grantedTo(Permissible permissible)
-    {
+    public boolean grantedTo(Permissible permissible) {
         return QuartzTeams.get().permissionsChecker().hasPermission(permissible, this);
     }
 }

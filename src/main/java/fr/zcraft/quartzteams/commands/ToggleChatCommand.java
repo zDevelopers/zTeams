@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams.commands;
 
 import fr.zcraft.quartzlib.components.commands.Command;
@@ -45,66 +46,55 @@ import fr.zcraft.quartzteams.texts.TextUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-@CommandInfo (name = "toggle-chat", usageParameters = "[* | \"<team name>\"]", aliases = "togglechat")
-public class ToggleChatCommand extends Command
-{
+@CommandInfo(name = "toggle-chat", usageParameters = "[* | \"<team name>\"]", aliases = "togglechat")
+public class ToggleChatCommand extends Command {
     @Override
-    protected void run() throws CommandException
-    {
+    protected void run() throws CommandException {
         // /togglechat
-        if (args.length == 0)
-        {
-            if (!QuartzTeamsPermission.ENTER_PRIVATE_CHAT.grantedTo(playerSender()))
-            {
+        if (args.length == 0) {
+            if (!QuartzTeamsPermission.ENTER_PRIVATE_CHAT.grantedTo(playerSender())) {
                 throwNotAuthorized();
             }
 
-            if (QuartzTeams.chatManager().toggleChatForPlayer(playerSender()))
-            {
+            if (QuartzTeams.chatManager().toggleChatForPlayer(playerSender())) {
                 success(I.t("{cs}You are now chatting with your team only."));
                 info(I.t("To exit, execute {0}", build()));
-            }
-            else
-            {
+            } else {
                 success(I.t("{cs}You are now chatting with everyone."));
             }
         }
 
         // /togglechat <another team>
-        else
-        {
-            if (!QuartzTeamsPermission.SPY_TEAM_CHAT.grantedTo(playerSender()))
-            {
+        else {
+            if (!QuartzTeamsPermission.SPY_TEAM_CHAT.grantedTo(playerSender())) {
                 throwNotAuthorized();
             }
 
             // Teams selector
-            if (args.length == 1 && args[0].equals("*"))
-            {
+            if (args.length == 1 && args[0].equals("*")) {
                 info("");
                 info(I.t("{green}{bold}Click on a team below to enter their private chat"));
 
                 final RawText buttons = new RawText();
                 int i = 0;
 
-                for (final QuartzTeam team : QuartzTeams.get().getTeams())
-                {
+                for (final QuartzTeam team : QuartzTeams.get().getTeams()) {
                     final RawText tooltip = new RawText(team.getName()).color(team.getColorOrWhite().toChatColor());
-                    team.getPlayers().forEach(player -> tooltip.then("\n- ").color(ChatColor.GRAY).then(player.getName()).color(ChatColor.WHITE));
-                    tooltip.then("\n\n» ").color(ChatColor.DARK_GRAY).then(I.t("{white}Click here {gray}to enter this team's private chat"));
+                    team.getPlayers().forEach(
+                            player -> tooltip.then("\n- ").color(ChatColor.GRAY).then(player.getName())
+                                    .color(ChatColor.WHITE));
+                    tooltip.then("\n\n» ").color(ChatColor.DARK_GRAY)
+                            .then(I.t("{white}Click here {gray}to enter this team's private chat"));
 
                     buttons
-                        .then("[  " + team.getName() + "  ]")
+                            .then("[  " + team.getName() + "  ]")
                             .color(team.getColorOrWhite().toChatColor())
                             .command(ToggleChatCommand.class, "\"" + team.getName() + "\"")
                             .hover(tooltip);
 
-                    if (i % 3 != 2)
-                    {
+                    if (i % 3 != 2) {
                         buttons.then("    ");
-                    }
-                    else
-                    {
+                    } else {
                         buttons.then("\n");
                     }
 
@@ -117,26 +107,23 @@ public class ToggleChatCommand extends Command
 
             final QuartzTeam team = QuartzTeams.get().getTeamByName(TextUtils.extractArgsWithQuotes(args, 0)[0]);
 
-            if (team != null)
-            {
-                if (QuartzTeams.chatManager().toggleChatForPlayer((Player) sender, team))
-                {
+            if (team != null) {
+                if (QuartzTeams.chatManager().toggleChatForPlayer((Player) sender, team)) {
                     success(I.t("{cs}You are now chatting with the team {0}{cs}.", team.getDisplayName()));
                     info(I.t("To exit, execute {0}", build()));
 
-                    if (!QuartzTeamsPermission.TALK_IN_OTHER_TEAM_CHAT.grantedTo(sender))
-                    {
-                        info(I.t("{gray}{bold}Warning:{gray} you are not allowed to talk to the team. Even if you're spying the team's private chat, your messages will go to the global chat."));
+                    if (!QuartzTeamsPermission.TALK_IN_OTHER_TEAM_CHAT.grantedTo(sender)) {
+                        info(I.t(
+                                "{gray}{bold}Warning:{gray} you are not allowed to talk to the team. Even if you're spying the team's private chat, your messages will go to the global chat."));
                     }
                 }
-            }
-            else
-            {
+            } else {
                 warning(I.t("{ce}This team does not exists."));
                 send(
-                    new RawText(I.t("Execute {0} or click here to select the team chat to enter by clicking on it.", build("*")))
-                        .color(ChatColor.GRAY)
-                        .command(ToggleChatCommand.class, "*")
+                        new RawText(I.t("Execute {0} or click here to select the team chat to enter by clicking on it.",
+                                build("*")))
+                                .color(ChatColor.GRAY)
+                                .command(ToggleChatCommand.class, "*")
                 );
             }
         }

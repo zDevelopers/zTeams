@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams.commands;
 
 import fr.zcraft.quartzlib.components.commands.Command;
@@ -42,16 +43,13 @@ import fr.zcraft.quartzteams.QuartzTeam;
 import fr.zcraft.quartzteams.QuartzTeams;
 import fr.zcraft.quartzteams.guis.editor.TeamEditGUI;
 
-@CommandInfo (name = "my-team", aliases = "myteam")
-public class MyTeamCommand extends Command
-{
+@CommandInfo(name = "my-team", aliases = "myteam")
+public class MyTeamCommand extends Command {
     @Override
-    protected void run() throws CommandException
-    {
+    protected void run() throws CommandException {
         final QuartzTeam team = QuartzTeams.get().getTeamForPlayer(playerSender());
 
-        if (team == null)
-        {
+        if (team == null) {
             error(I.t("{ce}You are not in a team!"));
             return;
         }

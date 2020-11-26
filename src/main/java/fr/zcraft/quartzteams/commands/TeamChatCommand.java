@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams.commands;
 
 import fr.zcraft.quartzlib.components.commands.Command;
@@ -40,19 +41,15 @@ import fr.zcraft.quartzlib.components.i18n.I;
 import fr.zcraft.quartzteams.QuartzTeams;
 import fr.zcraft.quartzteams.QuartzTeamsPermission;
 
-@CommandInfo (name = "team-chat", usageParameters = "<message>", aliases = "t")
-public class TeamChatCommand extends Command
-{
+@CommandInfo(name = "team-chat", usageParameters = "<message>", aliases = "t")
+public class TeamChatCommand extends Command {
     @Override
-    protected void run() throws CommandException
-    {
-        if (!QuartzTeamsPermission.ENTER_PRIVATE_CHAT.grantedTo(playerSender()))
-        {
+    protected void run() throws CommandException {
+        if (!QuartzTeamsPermission.ENTER_PRIVATE_CHAT.grantedTo(playerSender())) {
             throwNotAuthorized();
         }
 
-        if (args.length == 0)
-        {
+        if (args.length == 0) {
             throwInvalidArgument(I.t("Nothing to send to your team."));
         }
 

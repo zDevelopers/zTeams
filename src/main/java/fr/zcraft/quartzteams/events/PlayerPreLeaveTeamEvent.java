@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams.events;
 
 import fr.zcraft.quartzteams.QuartzTeam;
@@ -42,46 +43,39 @@ import org.bukkit.event.HandlerList;
 /**
  * Fired when a player wants to leave a team. This event is not fired if the team is left due to
  * another team joined.
- *
+ * <p>
  * If cancelled, the player will not left the team.
  */
-public class PlayerPreLeaveTeamEvent extends QuartzTeamsEvent implements Cancellable
-{
+public class PlayerPreLeaveTeamEvent extends QuartzTeamsEvent implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
 
     private final OfflinePlayer player;
     private boolean cancelled = false;
 
-    public PlayerPreLeaveTeamEvent(QuartzTeam team, OfflinePlayer player)
-    {
+    public PlayerPreLeaveTeamEvent(QuartzTeam team, OfflinePlayer player) {
         super(team);
         this.player = player;
     }
 
-    public OfflinePlayer getPlayer()
-    {
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
+    public OfflinePlayer getPlayer() {
         return player;
     }
 
     @Override
-    public boolean isCancelled()
-    {
+    public boolean isCancelled() {
         return cancelled;
     }
 
     @Override
-    public void setCancelled(boolean cancelled)
-    {
+    public void setCancelled(boolean cancelled) {
         this.cancelled = cancelled;
     }
 
-    public HandlerList getHandlers()
-    {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList()
-    {
+    public HandlerList getHandlers() {
         return handlers;
     }
 }

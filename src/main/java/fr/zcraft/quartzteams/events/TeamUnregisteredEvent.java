@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams.events;
 
 import fr.zcraft.quartzteams.QuartzTeam;
@@ -40,22 +41,18 @@ import org.bukkit.event.HandlerList;
 /**
  * Fired when a team is unregistered from zTeams.
  */
-public class TeamUnregisteredEvent extends TeamChangedEvent
-{
+public class TeamUnregisteredEvent extends TeamChangedEvent {
     private static final HandlerList handlers = new HandlerList();
 
-    public TeamUnregisteredEvent(final QuartzTeam team)
-    {
+    public TeamUnregisteredEvent(final QuartzTeam team) {
         super(team);
     }
 
-    public HandlerList getHandlers()
-    {
+    public static HandlerList getHandlerList() {
         return handlers;
     }
 
-    public static HandlerList getHandlerList()
-    {
+    public HandlerList getHandlers() {
         return handlers;
     }
 }

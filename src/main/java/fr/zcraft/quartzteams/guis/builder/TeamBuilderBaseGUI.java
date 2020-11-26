@@ -29,6 +29,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzteams.guis.builder;
 
 import fr.zcraft.quartzlib.components.gui.ActionGui;
@@ -43,40 +44,32 @@ import org.bukkit.Material;
 /**
  * The base of the team creator GUIs: contains the breadcrumb generator.
  */
-public abstract class TeamBuilderBaseGUI extends ActionGui
-{
-    protected void generateBreadcrumbs(BuildingStep step)
-    {
-        for (int i = 0; i < 9; i++)
-        {
-            if (i != 1 && i != 4 && i != 7)
-            {
+public abstract class TeamBuilderBaseGUI extends ActionGui {
+    protected void generateBreadcrumbs(BuildingStep step) {
+        for (int i = 0; i < 9; i++) {
+            if (i != 1 && i != 4 && i != 7) {
                 action("", i, new ItemStackBuilder(Material.WHITE_STAINED_GLASS_PANE).title(" "));
-            }
-            else
-            {
+            } else {
                 final BuildingStep slotStep;
                 final String achievedSubtitle;
 
-                if (i == 1)
-                {
+                if (i == 1) {
                     slotStep = BuildingStep.COLOR;
-                    achievedSubtitle = getColor() != null ? (getColor() == TeamColor.RANDOM ? ChatColor.WHITE + "" + ChatColor.MAGIC + "Random color" : getColor().toChatColor() + TextUtils.friendlyEnumName(getColor())) : "";
-                }
-                else if (i == 4)
-                {
+                    achievedSubtitle = getColor() != null ?
+                            (getColor() == TeamColor.RANDOM ? ChatColor.WHITE + "" + ChatColor.MAGIC + "Random color" :
+                                    getColor().toChatColor() + TextUtils.friendlyEnumName(getColor())) : "";
+                } else if (i == 4) {
                     slotStep = BuildingStep.NAME;
                     achievedSubtitle = getName() != null ? ChatColor.GRAY + getName() : "";
-                }
-                else
-                {
+                } else {
                     slotStep = BuildingStep.PLAYERS;
                     achievedSubtitle = ""; // Never displayed as achieved: it's the last one.
                 }
 
                 final boolean achieved = slotStep.isAchieved(step);
 
-                action("", i, new ItemStackBuilder(achieved ? Material.GREEN_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE)
+                action("", i, new ItemStackBuilder(
+                        achieved ? Material.GREEN_STAINED_GLASS_PANE : Material.RED_STAINED_GLASS_PANE)
                         .title(slotStep.getName())
                         .lore(achieved ? achievedSubtitle : null)
                 );
@@ -98,25 +91,22 @@ public abstract class TeamBuilderBaseGUI extends ActionGui
     /**
      * The current step used by {@link #generateBreadcrumbs(BuildingStep)}
      */
-    protected enum BuildingStep
-    {
+    protected enum BuildingStep {
         /// The title of the first step in the team creator GUIs
-        COLOR (I.t("{gray}1. {white}{bold}Team color")),
+        COLOR(I.t("{gray}1. {white}{bold}Team color")),
         /// The title of the second step in the team creator GUIs
-        NAME (I.t("{gray}2. {white}{bold}Team name")),
+        NAME(I.t("{gray}2. {white}{bold}Team name")),
         /// The title of the third step in the team creator GUIs
-        PLAYERS (I.t("{gray}3. {white}{bold}Team members"));
+        PLAYERS(I.t("{gray}3. {white}{bold}Team members"));
 
 
         private final String name;
 
-        BuildingStep(String name)
-        {
+        BuildingStep(String name) {
             this.name = name;
         }
 
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
@@ -126,8 +116,7 @@ public abstract class TeamBuilderBaseGUI extends ActionGui
          * @param step The current step.
          * @return {@code true} if achieved.
          */
-        public boolean isAchieved(BuildingStep step)
-        {
+        public boolean isAchieved(BuildingStep step) {
             return step.ordinal() > this.ordinal();
         }
     }

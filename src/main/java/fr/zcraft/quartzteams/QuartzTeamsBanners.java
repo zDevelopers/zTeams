@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams;
 
 import static fr.zcraft.quartzlib.tools.items.TextualBanners.getBannerMeta;
@@ -49,55 +50,55 @@ import org.bukkit.block.banner.PatternType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 
-public class QuartzTeamsBanners
-{
+public class QuartzTeamsBanners {
     private static final Map<String, BannerMeta> specialBanners = new HashMap<>();
 
-    static
-    {
-        specialBanners.put("banana", getBannerMeta(DyeColor.WHITE, Arrays.asList(new Pattern(DyeColor.YELLOW, PatternType.MOJANG), new Pattern(DyeColor.BROWN, PatternType.STRIPE_DOWNRIGHT), new Pattern(DyeColor.WHITE, PatternType.CIRCLE_MIDDLE), new Pattern(DyeColor.WHITE, PatternType.STRIPE_TOP), new Pattern(DyeColor.WHITE, PatternType.HALF_VERTICAL_MIRROR), new Pattern(DyeColor.WHITE, PatternType.STRIPE_TOP))));
+    static {
+        specialBanners.put("banana", getBannerMeta(DyeColor.WHITE,
+                Arrays.asList(new Pattern(DyeColor.YELLOW, PatternType.MOJANG),
+                        new Pattern(DyeColor.BROWN, PatternType.STRIPE_DOWNRIGHT),
+                        new Pattern(DyeColor.WHITE, PatternType.CIRCLE_MIDDLE),
+                        new Pattern(DyeColor.WHITE, PatternType.STRIPE_TOP),
+                        new Pattern(DyeColor.WHITE, PatternType.HALF_VERTICAL_MIRROR),
+                        new Pattern(DyeColor.WHITE, PatternType.STRIPE_TOP))));
     }
 
-    public static ItemStack getDefaultBanner(final String name, final DyeColor color)
-    {
-        if (QuartzTeams.settings().bannerAllowSpecialShapes())
-        {
+    public static ItemStack getDefaultBanner(final String name, final DyeColor color) {
+        if (QuartzTeams.settings().bannerAllowSpecialShapes()) {
             final String lowerName = name.toLowerCase();
 
-            if (lowerName.contains("banana") || lowerName.contains("banane"))
-            {
+            if (lowerName.contains("banana") || lowerName.contains("banane")) {
                 return getSpecialBanner("banana", color != DyeColor.YELLOW ? color : DyeColor.GREEN);
             }
         }
 
-        if (QuartzTeams.settings().bannerShapeWriteLetter())
-        {
+        if (QuartzTeams.settings().bannerShapeWriteLetter()) {
             return TextualBanners.getCharBanner(
                     Character.toUpperCase(TextUtils.getInitialLetter(name)),
                     color,
                     QuartzTeams.settings().bannerShapeAddBorder()
             );
-        }
-        else
-        {
+        } else {
             return new ItemStack(ItemUtils.colorize(ColorableMaterial.BANNER, color));
         }
     }
 
-    private static ItemStack getSpecialBanner(final String name, final DyeColor background)
-    {
+    private static ItemStack getSpecialBanner(final String name, final DyeColor background) {
         // TODO update when QuartzLib banners are updated
         final BannerMeta meta = specialBanners.get(name);
-        if (meta == null) throw new IllegalArgumentException("Unknown special banner " + name);
+        if (meta == null) {
+            throw new IllegalArgumentException("Unknown special banner " + name);
+        }
 
         List<Pattern> patterns = meta.getPatterns();
 
-        for (int i = 0; i < patterns.size(); i++)
-        {
-            DyeColor patternColor = patterns.get(i).getColor().equals(DyeColor.WHITE) ? background : patterns.get(i).getColor();
+        for (int i = 0; i < patterns.size(); i++) {
+            DyeColor patternColor =
+                    patterns.get(i).getColor().equals(DyeColor.WHITE) ? background : patterns.get(i).getColor();
             patterns.set(i, new Pattern(patternColor, patterns.get(i).getPattern()));
         }
 
-        return TextualBanners.getBanner(meta.getBaseColor().equals(DyeColor.WHITE) ? background : meta.getBaseColor(), patterns);
+        return TextualBanners
+                .getBanner(meta.getBaseColor().equals(DyeColor.WHITE) ? background : meta.getBaseColor(), patterns);
     }
 }

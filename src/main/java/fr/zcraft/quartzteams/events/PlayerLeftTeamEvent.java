@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams.events;
 
 import fr.zcraft.quartzteams.QuartzTeam;
@@ -41,41 +42,35 @@ import org.bukkit.event.HandlerList;
 /**
  * Fired when a player actually leaves a team.
  */
-public class PlayerLeftTeamEvent extends TeamChangedEvent
-{
+public class PlayerLeftTeamEvent extends TeamChangedEvent {
     private static final HandlerList handlers = new HandlerList();
 
     private final OfflinePlayer player;
     private final boolean becauseAnotherTeamWasJoined;
 
-    public PlayerLeftTeamEvent(QuartzTeam team, OfflinePlayer player, boolean becauseAnotherTeamWasJoined)
-    {
+    public PlayerLeftTeamEvent(QuartzTeam team, OfflinePlayer player, boolean becauseAnotherTeamWasJoined) {
         super(team);
 
         this.player = player;
         this.becauseAnotherTeamWasJoined = becauseAnotherTeamWasJoined;
     }
 
-    public OfflinePlayer getPlayer()
-    {
+    public static HandlerList getHandlerList() {
+        return handlers;
+    }
+
+    public OfflinePlayer getPlayer() {
         return player;
     }
 
     /**
      * @return {@code true} if this team is left because another was joined.
      */
-    public boolean isBecauseAnotherTeamWasJoined()
-    {
+    public boolean isBecauseAnotherTeamWasJoined() {
         return becauseAnotherTeamWasJoined;
     }
 
-    public HandlerList getHandlers()
-    {
-        return handlers;
-    }
-
-    public static HandlerList getHandlerList()
-    {
+    public HandlerList getHandlers() {
         return handlers;
     }
 }

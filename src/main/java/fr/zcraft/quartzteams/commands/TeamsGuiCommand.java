@@ -31,6 +31,7 @@
  * pris connaissance de la licence CeCILL, et que vous en avez accepté les
  * termes.
  */
+
 package fr.zcraft.quartzteams.commands;
 
 import fr.zcraft.quartzlib.components.commands.Command;
@@ -39,12 +40,10 @@ import fr.zcraft.quartzlib.components.commands.CommandInfo;
 import fr.zcraft.quartzlib.components.gui.Gui;
 import fr.zcraft.quartzteams.guis.TeamsSelectorGUI;
 
-@CommandInfo (name = "team-gui", aliases = {"teamgui", "teams-gui", "teamsgui"})
-public class TeamsGuiCommand extends Command
-{
+@CommandInfo(name = "team-gui", aliases = {"teamgui", "teams-gui", "teamsgui"})
+public class TeamsGuiCommand extends Command {
     @Override
-    protected void run() throws CommandException
-    {
+    protected void run() throws CommandException {
         Gui.open(playerSender(), new TeamsSelectorGUI());
     }
 }

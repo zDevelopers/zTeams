@@ -29,6 +29,7 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzteams.guis.editor;
 
 import fr.zcraft.quartzlib.components.gui.Gui;
@@ -38,18 +39,15 @@ import fr.zcraft.quartzteams.colors.TeamColor;
 import fr.zcraft.quartzteams.guis.builder.TeamBuilderStepColorGUI;
 
 
-public class TeamEditColorGUI extends TeamBuilderStepColorGUI
-{
+public class TeamEditColorGUI extends TeamBuilderStepColorGUI {
     private final QuartzTeam team;
 
-    public TeamEditColorGUI(QuartzTeam team)
-    {
+    public TeamEditColorGUI(QuartzTeam team) {
         this.team = team;
     }
 
     @Override
-    protected void onUpdate()
-    {
+    protected void onUpdate() {
         /// The title of the edit team color GUI. {0} = team name (raw).
         setTitle(I.t("{0} » {black}Color", team.getName()));
         setSize(6 * 9);
@@ -57,8 +55,7 @@ public class TeamEditColorGUI extends TeamBuilderStepColorGUI
     }
 
     @Override
-    protected void saveColor(TeamColor color)
-    {
+    protected void saveColor(TeamColor color) {
         team.setColor(color);
         Gui.open(getPlayer(), new TeamEditGUI(team), getParent().getParent());
     }
