@@ -32,7 +32,7 @@
 package fr.zcraft.quartzteams;
 
 import fr.zcraft.quartzlib.core.QuartzLib;
-import fr.zcraft.quartzteams.guis.TeamsGUIItemType;
+import fr.zcraft.quartzlib.tools.items.ColorableMaterial;
 import org.bukkit.scoreboard.Scoreboard;
 
 
@@ -49,7 +49,7 @@ public class QuartzTeamsSettings
     private boolean teamsOptionsColorizeChat = true;
     private boolean teamsOptionsAllowDuplicatedNames = false;
 
-    private TeamsGUIItemType teamsGUIItemType = TeamsGUIItemType.BANNER;
+    private ColorableMaterial teamsGUIItemType = ColorableMaterial.BANNER;
     private boolean teamsGUIGlowOnCurrentTeam = true;
 
     private int maxPlayersPerTeam = 0;
@@ -130,7 +130,7 @@ public class QuartzTeamsSettings
     /**
      * @return The GUI item to use to represent teams.
      */
-    public TeamsGUIItemType teamsGUIItemType()
+    public ColorableMaterial teamsGUIItemType()
     {
         return teamsGUIItemType;
     }
@@ -253,12 +253,12 @@ public class QuartzTeamsSettings
      *
      * All GUIs will be updated to follow these new settings when this method is called.
      *
-     * @param teamsGUIItemType The item to use to represent teams on the GUIs. Default {@link TeamsGUIItemType#BANNER BANNER}.
+     * @param teamsGUIItemType The item to use to represent teams on the GUIs. Default {@link ColorableMaterial#BANNER BANNER}.
      * @param teamsGUIGlowOnCurrentTeam {@code true} to add glow on the player's current team. Default {@code true}.
      */
-    public QuartzTeamsSettings setGUIOptions(final TeamsGUIItemType teamsGUIItemType, final boolean teamsGUIGlowOnCurrentTeam)
+    public QuartzTeamsSettings setGUIOptions(final ColorableMaterial teamsGUIItemType, final boolean teamsGUIGlowOnCurrentTeam)
     {
-        this.teamsGUIItemType = teamsGUIItemType != null ? teamsGUIItemType : TeamsGUIItemType.BANNER;
+        this.teamsGUIItemType = teamsGUIItemType != null ? teamsGUIItemType : ColorableMaterial.BANNER;
         this.teamsGUIGlowOnCurrentTeam = teamsGUIGlowOnCurrentTeam;
 
         QuartzTeams.get().updateGUIs();

@@ -33,21 +33,21 @@
  */
 package fr.zcraft.quartzteams;
 
+import static fr.zcraft.quartzlib.tools.items.TextualBanners.getBannerMeta;
+
+import fr.zcraft.quartzlib.tools.items.ColorableMaterial;
+import fr.zcraft.quartzlib.tools.items.ItemUtils;
 import fr.zcraft.quartzlib.tools.items.TextualBanners;
-import fr.zcraft.quartzteams.colors.ColorsUtils;
 import fr.zcraft.quartzteams.texts.TextUtils;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.bukkit.DyeColor;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static fr.zcraft.quartzlib.tools.items.TextualBanners.getBannerMeta;
 
 public class QuartzTeamsBanners
 {
@@ -80,7 +80,7 @@ public class QuartzTeamsBanners
         }
         else
         {
-            return new ItemStack(ColorsUtils.dye2Block(color, "BANNER"));
+            return new ItemStack(ItemUtils.colorize(ColorableMaterial.BANNER, color));
         }
     }
 

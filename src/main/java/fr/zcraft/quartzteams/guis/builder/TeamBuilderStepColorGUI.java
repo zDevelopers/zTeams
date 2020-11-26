@@ -29,28 +29,28 @@
  * The fact that you are presently reading this means that you have had
  * knowledge of the CeCILL-B license and that you accept its terms.
  */
+
 package fr.zcraft.quartzteams.guis.builder;
 
 import com.google.common.collect.ImmutableList;
 import fr.zcraft.quartzlib.components.gui.Gui;
 import fr.zcraft.quartzlib.components.gui.GuiAction;
 import fr.zcraft.quartzlib.components.i18n.I;
+import fr.zcraft.quartzlib.tools.items.ColorableMaterial;
 import fr.zcraft.quartzlib.tools.items.ItemStackBuilder;
+import fr.zcraft.quartzlib.tools.items.ItemUtils;
 import fr.zcraft.quartzlib.tools.runners.RunTask;
-import fr.zcraft.quartzteams.colors.ColorsUtils;
 import fr.zcraft.quartzteams.colors.TeamColor;
 import fr.zcraft.quartzteams.texts.TextUtils;
+import java.util.List;
+import java.util.Random;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.List;
-import java.util.Random;
 
-
-public class TeamBuilderStepColorGUI extends TeamBuilderBaseGUI
-{
+public class TeamBuilderStepColorGUI extends TeamBuilderBaseGUI {
     private final static Random randomSource = new Random();
     private final static List<Material> colorBlocks = ImmutableList.of(
             Material.WHITE_CONCRETE,
@@ -75,8 +75,7 @@ public class TeamBuilderStepColorGUI extends TeamBuilderBaseGUI
 
 
     @Override
-    protected void onUpdate()
-    {
+    protected void onUpdate() {
         /// The title of the color selector GUI, in the create team GUIs
         setTitle(I.t("New team » {black}Color"));
         setSize(6 * 9);
@@ -86,8 +85,7 @@ public class TeamBuilderStepColorGUI extends TeamBuilderBaseGUI
         insertColors(3);
     }
 
-    protected void insertColors(final int firstLine)
-    {
+    protected void insertColors(final int firstLine) {
         final int offset = (firstLine - 1) * 9;
 
         /// The random color button in a colors selector GUI.
@@ -115,22 +113,22 @@ public class TeamBuilderStepColorGUI extends TeamBuilderBaseGUI
         randomUpdate = RunTask.timer(() ->
         {
             ItemStack random = getInventory().getItem(offset + 4);
-            if (random != null)
+            if (random != null) {
                 random.setType(randomColorBlock());
+            }
         }, 15L, 15L);
     }
 
-    private void insertColor(int slot, ChatColor color)
-    {
+    private void insertColor(int slot, ChatColor color) {
         action(
-            "",
-            slot,
-            new ItemStackBuilder(ColorsUtils.chat2Block(color, "CONCRETE"))
-                // The color is extracted from the title, so it has to be directly inside,
-                // not as a JSON attribute.
-                // See #unknown_action(String, int, ItemStack).
-                .title(color + TextUtils.friendlyEnumName(color))
-            .item()
+                "",
+                slot,
+                new ItemStackBuilder(ItemUtils.colorize(ColorableMaterial.CONCRETE, color))
+                        // The color is extracted from the title, so it has to be directly inside,
+                        // not as a JSON attribute.
+                        // See #unknown_action(String, int, ItemStack).
+                        .title(color + TextUtils.friendlyEnumName(color))
+                        .item()
         );
     }
 
@@ -139,29 +137,27 @@ public class TeamBuilderStepColorGUI extends TeamBuilderBaseGUI
     }
 
 
-    @GuiAction ("random")
-    protected void random()
-    {
+    @GuiAction("random")
+    protected void random() {
         saveColor(TeamColor.RANDOM);
     }
 
     @Override
-    protected void unknown_action(String name, int slot, ItemStack item)
-    {
-        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName())
-            saveColor(TeamColor.fromChatColor(ChatColor.getByChar(ChatColor.getLastColors(item.getItemMeta().getDisplayName().replace(ChatColor.RESET.toString(), "")).substring(1))));
+    protected void unknown_action(String name, int slot, ItemStack item) {
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            saveColor(TeamColor.fromChatColor(ChatColor.getByChar(
+                    ChatColor.getLastColors(item.getItemMeta().getDisplayName().replace(ChatColor.RESET.toString(), ""))
+                            .substring(1))));
+        }
     }
 
-    protected void saveColor(TeamColor color)
-    {
+    protected void saveColor(TeamColor color) {
         Gui.open(getPlayer(), new TeamBuilderStepNameGUI(color));
     }
 
     @Override
-    protected void onClose()
-    {
-        if (randomUpdate != null)
-        {
+    protected void onClose() {
+        if (randomUpdate != null) {
             randomUpdate.cancel();
             randomUpdate = null;
         }
@@ -170,8 +166,12 @@ public class TeamBuilderStepColorGUI extends TeamBuilderBaseGUI
     }
 
     @Override
-    protected TeamColor getColor() { return null; }
+    protected TeamColor getColor() {
+        return null;
+    }
 
     @Override
-    protected String getName() { return null; }
+    protected String getName() {
+        return null;
+    }
 }

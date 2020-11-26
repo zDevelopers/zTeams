@@ -33,8 +33,9 @@
  */
 package fr.zcraft.quartzteams;
 
+import fr.zcraft.quartzlib.tools.items.ColorableMaterial;
 import fr.zcraft.quartzlib.tools.items.ItemStackBuilder;
-import fr.zcraft.quartzteams.colors.ColorsUtils;
+import fr.zcraft.quartzlib.tools.items.ItemUtils;
 import fr.zcraft.quartzteams.colors.TeamColor;
 import fr.zcraft.quartzteams.events.PlayerJoinedTeamEvent;
 import fr.zcraft.quartzteams.events.PlayerLeftTeamEvent;
@@ -44,6 +45,7 @@ import fr.zcraft.quartzteams.events.TeamUpdatedEvent;
 import org.apache.commons.lang.Validate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -452,7 +454,7 @@ public class QuartzTeam implements Collection<UUID>
         this.banner = new ItemStackBuilder(banner.clone())
                 .title(displayName)
                 .amount(1)
-                .hideAttributes()
+                .hideAllAttributes()
                 .item();
 
         QuartzTeams.fireEvent(new TeamUpdatedEvent(this));
@@ -471,10 +473,10 @@ public class QuartzTeam implements Collection<UUID>
             return;
         }
 
-        this.banner = new ItemStackBuilder(ColorsUtils.chat2Block(color.toChatColor(), "BANNER"))
+        this.banner = new ItemStackBuilder(ItemUtils.colorize(ColorableMaterial.BANNER, color.toChatColor()))
                 .title(displayName)
                 .amount(1)
-                .hideAttributes()
+                .hideAllAttributes()
                 .item();
 
         this.banner.setItemMeta(banner.clone());
@@ -706,7 +708,8 @@ public class QuartzTeam implements Collection<UUID>
             return;
         }
 
-        defaultBanner = QuartzTeamsBanners.getDefaultBanner(name, ColorsUtils.chat2Dye(getColorOrWhite().toChatColor()));
+        defaultBanner = QuartzTeamsBanners.getDefaultBanner(name, ItemUtils.asDye(getColorOrWhite().toChatColor()).orElse(
+                DyeColor.WHITE));
     }
 
 

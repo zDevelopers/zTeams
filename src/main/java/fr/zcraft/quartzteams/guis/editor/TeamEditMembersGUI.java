@@ -39,17 +39,15 @@ import fr.zcraft.quartzlib.tools.items.ItemStackBuilder;
 import fr.zcraft.quartzteams.QuartzTeam;
 import fr.zcraft.quartzteams.QuartzTeams;
 import fr.zcraft.quartzteams.guis.utils.OfflinePlayersComparator;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.SkullType;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
-
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 
 public class TeamEditMembersGUI extends ExplorerGui<OfflinePlayer>
@@ -87,21 +85,14 @@ public class TeamEditMembersGUI extends ExplorerGui<OfflinePlayer>
 
         final boolean inThisTeam = this.team.equals(team);
 
-        // TODO update to new item meta ISB API when available
-        final ItemStack button = new ItemStackBuilder(Material.PLAYER_HEAD)
-                .data((short) SkullType.PLAYER.ordinal())
+        return new ItemStackBuilder(Material.PLAYER_HEAD)
                 .title(I.t("{reset}{0}", displayName))
                     .lore(player.isOnline() ? I.t("{gray}Online") : I.t("{gray}Offline"))
                     .lore(team != null ? I.t("{gray}Current team: {0}", team.getDisplayName()) : I.t("{gray}Current team: none"))
                     .loreLine()
                     .lore(inThisTeam ? I.t("{darkgray}» {white}Click {gray}to remove this player") : I.t("{darkgray}» {white}Click {gray}to add this player"))
+                .withMeta((SkullMeta s) -> s.setOwningPlayer(player))
                 .item();
-
-        SkullMeta meta = (SkullMeta) button.getItemMeta();
-        meta.setOwningPlayer(player);
-        button.setItemMeta(meta);
-
-        return button;
     }
 
     @Override

@@ -38,18 +38,16 @@ import fr.zcraft.quartzlib.components.gui.GuiUtils;
 import fr.zcraft.quartzlib.components.gui.PromptGui;
 import fr.zcraft.quartzlib.components.i18n.I;
 import fr.zcraft.quartzlib.tools.items.ItemStackBuilder;
+import fr.zcraft.quartzlib.tools.items.ItemUtils;
 import fr.zcraft.quartzteams.QuartzTeam;
 import fr.zcraft.quartzteams.QuartzTeams;
 import fr.zcraft.quartzteams.QuartzTeamsPermission;
-import fr.zcraft.quartzteams.colors.ColorsUtils;
 import fr.zcraft.quartzteams.guis.builder.TeamBuilderStepColorGUI;
 import fr.zcraft.quartzteams.guis.editor.TeamEditGUI;
-import org.bukkit.DyeColor;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 
 public class TeamsSelectorGUI extends ExplorerGui<QuartzTeam>
@@ -147,52 +145,6 @@ public class TeamsSelectorGUI extends ExplorerGui<QuartzTeam>
             lore.add(I.t("{darkgray}» {white}Right-click {gray}to manage this team"));
         }
 
-
-        // Item
-        final ItemStack item;
-        final DyeColor dye = ColorsUtils.chat2Dye(team.getColorOrWhite().toChatColor());
-
-        switch (QuartzTeams.settings().teamsGUIItemType())
-        {
-            case BANNER:
-                item = team.getBanner();
-                break;
-
-            case TERRACOTTA:
-                item = new ItemStack(ColorsUtils.dye2Block(dye, "TERRACOTTA"));
-                break;
-
-            case GLAZED_TERRACOTTA:
-                item = new ItemStack(ColorsUtils.dye2Block(dye, "GLAZED_TERRACOTTA"));
-                break;
-
-            case GLASS:
-                item = new ItemStack(ColorsUtils.dye2Block(dye, "STAINED_GLASS"));
-                break;
-
-            case GLASS_PANE:
-                item = new ItemStack(ColorsUtils.dye2Block(dye, "STAINED_GLASS_PANE"));
-                break;
-
-            case DYE:
-                item = new ItemStack(ColorsUtils.dye2Block(dye, "DYE"));
-                break;
-
-            case WOOL:
-                item = new ItemStack(ColorsUtils.dye2Block(dye, "WOOL"));
-                break;
-
-            case CONCRETE_POWDER:
-                item = new ItemStack(ColorsUtils.dye2Block(dye, "CONCRETE_POWDER"));
-                break;
-
-            case CONCRETE:
-            default:
-                item = new ItemStack(ColorsUtils.dye2Block(dye, "CONCRETE"));
-                break;
-        }
-
-
         // Title
         final String title = QuartzTeams.settings().maxPlayersPerTeam() != 0
                 /// Title of the team item in the teams selector GUI (with max). {0}: team display name. {1}: players count. {2}: max count.
@@ -200,11 +152,11 @@ public class TeamsSelectorGUI extends ExplorerGui<QuartzTeam>
                 /// Title of the team item in the teams selector GUI (without max) {0}: team display name. {1}: players count.
                 : I.tn("{white}Team {0} {gray}({1} player)", "{white}Team {0} {gray}({1} players)", team.size(), team.getDisplayName(), team.size());
 
-        return new ItemStackBuilder(item)
+        return new ItemStackBuilder(ItemUtils.colorize(QuartzTeams.settings().teamsGUIItemType(), team.getColorOrWhite().toChatColor()))
                 .title(title)
                 .lore(lore)
                 .glow(QuartzTeams.settings().teamsGUIGlowOnCurrentTeam() && isPlayerInTeam)
-                .hideAttributes()
+                .hideAllAttributes()
                 .item();
     }
 
@@ -220,7 +172,7 @@ public class TeamsSelectorGUI extends ExplorerGui<QuartzTeam>
                             ? I.t("{gray}Click the emerald button below to create one.")
                             /// Subtitle of the item displayed in the teams selector GUI if there isn't anything to display and the player cannot create a team.
                             : I.t("{gray}Wait for an administrator to create one."))
-                    .hideAttributes()
+                    .hideAllAttributes()
                     .item();
         }
         else
@@ -232,7 +184,7 @@ public class TeamsSelectorGUI extends ExplorerGui<QuartzTeam>
                             ? I.t("{gray}You can still click the item below to open your team's settings.")
                             /// Subtitle of the item displayed in the teams selector GUI if teams are not listable by the player, and it is not into a team.
                             : I.t("{gray}Sorry."))
-                    .hideAttributes()
+                    .hideAllAttributes()
                     .item();
         }
     }

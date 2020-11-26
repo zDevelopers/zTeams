@@ -36,10 +36,11 @@ import fr.zcraft.quartzlib.components.gui.GuiAction;
 import fr.zcraft.quartzlib.components.gui.GuiUtils;
 import fr.zcraft.quartzlib.components.gui.PromptGui;
 import fr.zcraft.quartzlib.components.i18n.I;
+import fr.zcraft.quartzlib.tools.items.ColorableMaterial;
 import fr.zcraft.quartzlib.tools.items.ItemStackBuilder;
+import fr.zcraft.quartzlib.tools.items.ItemUtils;
 import fr.zcraft.quartzteams.QuartzTeam;
 import fr.zcraft.quartzteams.QuartzTeamsPermission;
-import fr.zcraft.quartzteams.colors.ColorsUtils;
 import fr.zcraft.quartzteams.texts.TextUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -83,7 +84,7 @@ public class TeamEditGUI extends TeamActionGUI
                 .title(team.getDisplayName())
                 /// Members count in the banner description, in the team edit GUI.
                 .longLore(I.tn("{white}{0} {gray}member", "{white}{0} {gray}members", team.size()))
-                .lore(" ").hideAttributes();
+                .lore(" ").hideAllAttributes();
 
         if (QuartzTeamsPermission.UPDATE_TEAM_BANNER.grantedTo(getPlayer()))
             bannerButton.longLore(I.t("{white}Click with a banner {gray}to update this team's banner"));
@@ -95,7 +96,8 @@ public class TeamEditGUI extends TeamActionGUI
 
         /* *** Color *** */
 
-        final ItemStackBuilder colorButton = new ItemStackBuilder(ColorsUtils.chat2Block(team.getColorOrWhite().toChatColor(), "CONCRETE"))
+        final ItemStackBuilder colorButton = new ItemStackBuilder(
+                ItemUtils.colorize(ColorableMaterial.CONCRETE, team.getColorOrWhite().toChatColor()))
                 /// Update team color button in edit GUI.
                 .title(I.t("{green}Update the color"))
                 .longLore(I.tc(
